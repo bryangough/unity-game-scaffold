@@ -1,0 +1,10 @@
+{
+  "_comment": "Claude Code project MCP config. Copy to .mcp.json to let the assistant drive the Unity Editor through Unity's own MCP relay (the com.unity.ai.assistant package in Packages/manifest.json installs it; the relay binary lands in ~/.unity/relay). Open the project in Unity first; the Editor must be running for the tools to answer.",
+  "mcpServers": {
+    "unity-mcp": {
+      "command": "C:\\Users\\<you>\\.unity\\relay\\relay_win.exe",
+      "args": ["--mcp"],
+      "env": {}
+    }
+  }
+}

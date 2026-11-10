@@ -1,0 +1,61 @@
+# Unity (from https://github.com/github/gitignore/blob/main/Unity.gitignore)
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+/[Mm]emoryCaptures/
+/[Rr]ecordings/
+/[Aa]ssets/Plugins/Editor/JetBrains*
+.vs/
+.gradle/
+ExportedObj/
+.consulo/
+*.csproj
+*.unityproj
+*.sln
+*.slnx
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+*.pidb.meta
+*.pdb.meta
+*.mdb.meta
+sysinfo.txt
+*.apk
+*.aab
+*.unitypackage
+*.app
+crashlytics-build.properties
+/[Aa]ssets/[Aa]ddressable[Aa]ssets[Dd]ata/*/*.bin*
+/[Aa]ssets/[Ss]treamingAssets/aa.meta
+/[Aa]ssets/[Ss]treamingAssets/aa/*
+**/.DS_Store
+
+# Android build temp (Gradle / CMake)
+.utmp/
+
+# A WebGL build leaves this at the project root
+/Data/
+
+# The music bundles, built per platform before every player build (Editor/MusicBundles.cs)
+/[Aa]ssets/StreamingAssets/Music/
+/[Aa]ssets/StreamingAssets/Music.meta
+
+# TextMesh Pro's essential resources are Unity's: imported by Setup, never committed
+/[Aa]ssets/TextMesh Pro/
+/[Aa]ssets/TextMesh Pro.meta
+
+# Store screenshots are kept; signing keys never live in the repo (they go to %USERPROFILE%/.keys/<game>)
+*.keystore
+signing.txt

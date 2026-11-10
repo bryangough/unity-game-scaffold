@@ -1,7 +1,7 @@
 # __GAME__: image prompts for the 2D art
 
 The pictures the game and the store need that are not 3D models or drawn in code: icon, title logo, splash,
-badges, portraits, callout decals, store graphics. Generate them, drop them into `Assets/_mine/Game/Art/Generated/`
+badges, portraits, callout decals, store graphics. Generate them, drop them into `Assets/Game/Art/Generated/`
 (`icon_*.png`, `logo_*.jpg`, `portrait_<name>.jpg`, `splash_*.jpg`, anything else as a cut-out sprite) and run
 `__GAME__ > Art > Cut Out Generated Art`: the background is removed, portraits get a round mask, the icon is set.
 Then the task that wires each one in. From the duel and slope games, where this file kept a set of images consistent.

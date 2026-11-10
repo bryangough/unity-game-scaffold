@@ -115,7 +115,7 @@ they could be.
   Quality level (or `QualitySettings.SetQualityLevel(0, true)` in Play mode) before judging light, shadows or
   bloom. Settings changed on an RP asset in Play mode are not saved: set them again in edit mode.
 - **Cap third-party textures, by what the build reaches.** Uncapped packs made 345–387 MB APKs and ran a WebGL
-  build out of memory. `TextureCaps` walks the build scenes' dependencies and caps everything outside `_mine` per
+  build out of memory. `TextureCaps` walks the build scenes' dependencies and caps everything outside `Assets/Game` per
   platform (secondary maps at 256); `MeshCaps` compresses their meshes; both run before every build.
 - **Readability floors from a phone test** (duel game, iPhone 16 Pro, on a 1080-wide canvas): body text ≥ 42 px,
   captions ≥ 34, buttons ≥ 120 tall with ≥ 44 px labels. On the scaffold's 720-wide canvas that is body ≥ 28,

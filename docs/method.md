@@ -37,7 +37,7 @@ built), the owner's playtest lines, and the design doc. That record is kept for 
 came from"; the plan lives in `TASKS.md`.
 
 Graduation changes the rules: Input System only (the test bed tolerated legacy keys), portrait, a save, a phased
-plan. The first commits are housekeeping: own the code (`Assets/_mine/Game/`, a namespace, a menu), the scene from
+plan. The first commits are housekeeping: own the code (`Assets/Game/`, a namespace, a menu), the scene from
 the builder, the current level surviving `R`.
 
 ## 3. The plan is one file
@@ -103,7 +103,7 @@ The duel game (two full themes on one rules core) added two habits the others ke
 
 ## 6. Assets
 
-The owner's packs live on a shelf outside every project (`D:/GameDev/` in the original). Nothing is imported until
+The owner's packs live on a shelf outside every project (one folder shared by every project). Nothing is imported until
 the **art pick**, made from screenshots; then only the subset a builder uses is copied in (follow GUID dependencies,
 never overwrite), and a **theme asset** dresses the primitives so a level never references a model. Sound libraries
 are never dropped into `Assets/`: a picks list names the files (two to four variants per sound, so the owner hears

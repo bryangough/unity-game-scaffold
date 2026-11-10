@@ -29,7 +29,7 @@ namespace GameScaffold
         }
 
         /// <summary>Where the music stems live in the project (one folder per track, <c>Music1/Music1_0.wav</c>...).</summary>
-        public const string MusicFolder = "Assets/_mine/Game/Audio/Music";
+        public const string MusicFolder = "Assets/Game/Audio/Music";
 
         private const int Voices = 8;
         private static Sfx instance;

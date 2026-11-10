@@ -10,13 +10,13 @@ namespace GameScaffold.Editor
 {
     /// <summary>
     /// <b>The source of truth for the scene.</b> <c>Game > Build Main Scene</c> regenerates
-    /// <c>Assets/_mine/Game/Scenes/Main.unity</c> (light, camera, input adapter, the HUD canvas, the game manager, the
+    /// <c>Assets/Game/Scenes/Main.unity</c> (light, camera, input adapter, the HUD canvas, the game manager, the
     /// fun-test kit) and puts it in Build Settings. Nothing in the scene is hand-placed: change this file, rebuild,
     /// commit both. Levels are data (<see cref="SampleLevels"/>), never scenes.
     /// </summary>
     public static class SceneBuilder
     {
-        public const string ScenePath = "Assets/_mine/Game/Scenes/Main.unity";
+        public const string ScenePath = "Assets/Game/Scenes/Main.unity";
 
         [MenuItem(Menus.Root + "Build Main Scene", false, 1)]
         public static void Build()

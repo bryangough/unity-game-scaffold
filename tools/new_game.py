@@ -171,7 +171,7 @@ next:
   2. In the Editor: {a.name} > Setup Project (once)  (TMP essentials, sound bank, the Main scene), then Play.
   3. Bringing a prototype from the idea test bed? python tools/graduate.py <path to Proto_NN_Name> "{folder}"
   4. Read CLAUDE.md, then fill in Assets/docs/TASKS.md: "Where the game is", the bar, phase 1.
-  5. Delete Assets/_mine/Game/Scripts/Sample/ (and its tests) once your own game manager is in; keep the Kit.
+  5. Delete Assets/Game/Scripts/Sample/ (and its tests) once your own game manager is in; keep the Kit.
 """)
 
 

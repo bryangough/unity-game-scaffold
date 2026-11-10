@@ -5,14 +5,14 @@ using UnityEditor;
 namespace GameScaffold.Editor
 {
     /// <summary>
-    /// Mobile import settings for every clip under <c>Assets/_mine/Game/Audio/SFX/</c>: mono, 22 050 Hz, short
+    /// Mobile import settings for every clip under <c>Assets/Game/Audio/SFX/</c>: mono, 22 050 Hz, short
     /// one-shots Decompress On Load + ADPCM, loops and long clips Compressed In Memory + Vorbis 50 %, preloaded. Music
     /// under <c>Audio/Music/</c>: mono, 22 050 Hz, Streaming, Vorbis 30 % (~5 KB/s, so a 160 s stem is under 1 MB).
     /// </summary>
     public class SfxImportRules : AssetPostprocessor
     {
-        private const string Root = "Assets/_mine/Game/Audio/SFX/";
-        private const string MusicRoot = "Assets/_mine/Game/Audio/Music/";
+        private const string Root = "Assets/Game/Audio/SFX/";
+        private const string MusicRoot = "Assets/Game/Audio/Music/";
         private const long LongBytes = 360_000; // ~4 s of 44.1 kHz mono 16-bit
 
         private void OnPreprocessAudio()

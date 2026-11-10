@@ -18,8 +18,8 @@ namespace GameScaffold.Editor
     /// </summary>
     public static class ArtCutout
     {
-        public const string Src = "Assets/_mine/Game/Art/Generated/";
-        public const string Out = "Assets/_mine/Game/Art/UI/";
+        public const string Src = "Assets/Game/Art/Generated/";
+        public const string Out = "Assets/Game/Art/UI/";
         /// <summary>How far from the border colour a pixel may be and still count as background (0–255 per channel).</summary>
         public const float DefaultThreshold = 30f;
 

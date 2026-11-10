@@ -10,7 +10,7 @@ namespace GameScaffold.Editor
     /// <summary>
     /// The sound pipeline. Sound libraries live OUTSIDE the project under one root (set per machine with
     /// <c>Game > Audio > Set Sound Library Folder</c>; pick paths are relative to it). Only the picks below are copied
-    /// in, to <c>Assets/_mine/Game/Audio/SFX/&lt;Id&gt;/</c>, where <see cref="SfxImportRules"/> gives them mobile
+    /// in, to <c>Assets/Game/Audio/SFX/&lt;Id&gt;/</c>, where <see cref="SfxImportRules"/> gives them mobile
     /// import settings; <c>Import Sound Picks</c> copies what is missing, removes files no longer picked and rebuilds
     /// <c>Resources/SoundBank.asset</c>. A machine without the library keeps working from the copies in git. To
     /// change a sound: edit the list, import, commit. Give every id two to four variants, so the owner hears the
@@ -21,11 +21,11 @@ namespace GameScaffold.Editor
     /// </summary>
     public static class SoundPicks
     {
-        public const string SfxRoot = "Assets/_mine/Game/Audio/SFX";
+        public const string SfxRoot = "Assets/Game/Audio/SFX";
         public static string MusicRoot => Sfx.MusicFolder;
-        public const string BankPath = "Assets/_mine/Game/Resources/SoundBank.asset";
+        public const string BankPath = "Assets/Game/Resources/SoundBank.asset";
         private static readonly string LibraryPref = GameInfo.Id + ".soundRoot";
-        private const string DefaultLibrary = "D:/GameDev/Sound";
+        private const string DefaultLibrary = "";   // set per machine: Audio > Set Sound Library Folder
 
         private struct Pick
         {
@@ -97,7 +97,7 @@ namespace GameScaffold.Editor
             string lib = LibraryFolder;
             bool haveLib = Directory.Exists(lib);
             if (!haveLib && (Picks.Length > 0 || MusicPicks.Length > 0))
-                Debug.LogWarning($"[SoundPicks] library not found at {lib}: keeping the copies already in {SfxRoot} (Audio > Set Sound Library Folder to fix)");
+                Debug.LogWarning(string.IsNullOrEmpty(lib) ? $"[SoundPicks] no sound library set: keeping the copies already in {SfxRoot} (Audio > Set Sound Library Folder to fix)" : $"[SoundPicks] library not found at {lib}: keeping the copies already in {SfxRoot} (Audio > Set Sound Library Folder to fix)");
             var log = new StringBuilder();
             int copied = 0, kept = 0, missing = 0, removed = 0;
             var wanted = new HashSet<string>();

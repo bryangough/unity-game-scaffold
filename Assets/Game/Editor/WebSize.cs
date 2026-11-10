@@ -30,7 +30,7 @@ namespace GameScaffold.Editor
         /// <summary>Texture paths crunched on the web (lossy, fine for flat UI art), with the web max size (0 = keep).</summary>
         public static readonly Dictionary<string, int> CrunchOnWeb = new Dictionary<string, int>
         {
-            // { "Assets/_mine/Game/Resources/MenuBackdrop.png", 1024 },
+            // { "Assets/Game/Resources/MenuBackdrop.png", 1024 },
         };
         public const int CrunchQuality = 75;
 

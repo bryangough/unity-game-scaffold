@@ -10,7 +10,7 @@ namespace GameScaffold.Editor
     /// Per-platform texture caps for third-party art. Bought packs ship 2–4K uncompressed maps (metallic, emissive,
     /// normal per colour variant); in the duel game the uncapped packs made 345–387 MB APKs and ran the WebGL build out
     /// of memory. Only the textures a build can reach are touched (the build scenes and our Resources folders, with
-    /// their dependencies), only outside <c>Assets/_mine</c>, and UI sprites are left alone. Writes platform overrides
+    /// their dependencies), only outside <c>Assets/Game</c>, and UI sprites are left alone. Writes platform overrides
     /// into the packs' import settings (.meta): a deliberate exception to the read-only rule (the files themselves are
     /// not changed). Re-runnable; <see cref="PhoneBuilds"/> runs it for the target before every build. Our own art is
     /// capped by hand in <see cref="WebSize"/>.
@@ -48,7 +48,7 @@ namespace GameScaffold.Editor
         {
             var roots = new List<string>();
             foreach (EditorBuildSettingsScene s in EditorBuildSettings.scenes) if (s.enabled) roots.Add(s.path);
-            foreach (string guid in AssetDatabase.FindAssets("", new[] { "Assets/_mine" }))
+            foreach (string guid in AssetDatabase.FindAssets("", new[] { "Assets/Game" }))
             {
                 string p = AssetDatabase.GUIDToAssetPath(guid);
                 if (p.Contains("/Resources/") && !AssetDatabase.IsValidFolder(p)) roots.Add(p);
@@ -59,9 +59,9 @@ namespace GameScaffold.Editor
         /// <summary>Every asset a build can reach (see <see cref="Roots"/>).</summary>
         public static string[] BuildDependencies() => AssetDatabase.GetDependencies(Roots(), true);
 
-        /// <summary>Third-party assets the build reaches (outside <c>Assets/_mine</c>, inside <c>Assets</c>).</summary>
+        /// <summary>Third-party assets the build reaches (outside <c>Assets/Game</c>, inside <c>Assets</c>).</summary>
         public static List<string> VendorDependencies() =>
-            BuildDependencies().Where(p => !p.StartsWith("Assets/_mine/") && p.StartsWith("Assets/")).Distinct().ToList();
+            BuildDependencies().Where(p => !p.StartsWith("Assets/Game/") && p.StartsWith("Assets/")).Distinct().ToList();
 
         /// <summary>Caps textures for one platform. Returns how many importers changed.</summary>
         public static int Apply(string platform, int maxSize)

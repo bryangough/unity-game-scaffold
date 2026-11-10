@@ -243,7 +243,7 @@ namespace GameScaffold.Editor
                 foreach (PackedAssetInfo c in pa.contents)
                 {
                     total += c.packedSize;
-                    if (c.sourceAssetPath != null && c.sourceAssetPath.StartsWith("Assets/_mine/")) mine += c.packedSize;
+                    if (c.sourceAssetPath != null && c.sourceAssetPath.StartsWith("Assets/Game/")) mine += c.packedSize;
                 }
             Log(target, $"packed assets {total / 1e6:0.0} MB: the game's own {mine / 1e6:0.00} MB, vendor and built-in {(total - mine) / 1e6:0.00} MB");
             WriteSizeReport(target, report, total);

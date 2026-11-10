@@ -41,7 +41,7 @@ def unity_exe():
 
 def editor_namespace():
     """The Editor assembly's root namespace (new_game.py renames it), for -executeMethod."""
-    path = os.path.join(ROOT, "Assets", "_mine", "Game", "Editor", "Game.Editor.asmdef")
+    path = os.path.join(ROOT, "Assets", "Game", "Editor", "Game.Editor.asmdef")
     with open(path, encoding="utf-8") as f:
         return json.load(f).get("rootNamespace", "GameScaffold.Editor")
 
@@ -107,7 +107,7 @@ def cmd_compile():
 
 def cmd_setup():
     code, _, errors = run(["-executeMethod", editor_namespace() + ".ProjectSetup.Batch"], "setup")
-    scene = os.path.join(ROOT, "Assets", "_mine", "Game", "Scenes", "Main.unity")
+    scene = os.path.join(ROOT, "Assets", "Game", "Scenes", "Main.unity")
     tmp = os.path.join(ROOT, "Assets", "TextMesh Pro", "Resources", "TMP Settings.asset")
     print("main scene:", "built" if os.path.exists(scene) else "MISSING")
     print("TMP essentials:", "in" if os.path.exists(tmp) else "MISSING (run setup again, or Window > TextMeshPro > Import TMP Essential Resources)")

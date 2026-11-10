@@ -10,7 +10,7 @@ namespace GameScaffold.Editor
 {
     /// <summary>
     /// <c>Game > Checks > Text Fit Audit</c>: every TextMesh Pro label in the open scene (and in prefabs under
-    /// <c>Assets/_mine</c>) checked against the readability floors a phone test set, scaled to the 720-wide canvas:
+    /// <c>Assets/Game</c>) checked against the readability floors a phone test set, scaled to the 720-wide canvas:
     /// body text ≥ 24 px, captions ≥ 20, button labels ≥ 28; and no label whose text overflows its box. Writes
     /// <c>Builds/Checks/text.md</c>. From the duel game's iPhone test ("too small to read at arm's length").
     /// </summary>
@@ -25,7 +25,7 @@ namespace GameScaffold.Editor
             var sb = new StringBuilder();
             int issues = 0, labels = 0;
             foreach (TMP_Text t in Object.FindObjectsByType<TMP_Text>(FindObjectsInactive.Include)) { labels++; issues += Check(t, "scene", sb); }
-            foreach (string guid in AssetDatabase.FindAssets("t:Prefab", new[] { "Assets/_mine" }))
+            foreach (string guid in AssetDatabase.FindAssets("t:Prefab", new[] { "Assets/Game" }))
             {
                 string path = AssetDatabase.GUIDToAssetPath(guid);
                 GameObject root = PrefabUtility.LoadPrefabContents(path);

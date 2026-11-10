@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """Graduate a prototype from the idea test bed into a game project made from the scaffold.
 
-    python tools/graduate.py D:/Unity/AiGameIdeas/Assets/Prototypes/Proto_03_IsometricStealth D:/Unity/CloakAndCrate
+    python tools/graduate.py D:/Unity/IdeaTestBed/Assets/Prototypes/Proto_03_IsometricStealth D:/Unity/MyGame
     python tools/graduate.py <proto folder> <project> --row 1.03 --no-wrap
 
 What it does:
-  1. Copies the prototype's Scripts/ into <project>/Assets/_mine/Game/Scripts/<ProtoName>/ and its Editor/ into
-     <project>/Assets/_mine/Game/Editor/<ProtoName>/ (scenes are not copied: the builder regenerates them).
+  1. Copies the prototype's Scripts/ into <project>/Assets/Game/Scripts/<ProtoName>/ and its Editor/ into
+     <project>/Assets/Game/Editor/<ProtoName>/ (scenes are not copied: the builder regenerates them).
   2. Wraps every copied file that has no namespace in the project's namespace (from Game.asmdef), so it lands in the
      Game / Game.Editor assemblies beside the kit. (--no-wrap to skip.)
   3. Rewrites the test bed's scene-registration call to the scaffold's, and drops `using` lines for the test bed's
@@ -70,7 +70,7 @@ def main():
     nn = m.group(1) if m else None
     short = m.group(2) if m else proto_name
     testbed = os.path.dirname(os.path.dirname(os.path.dirname(proto)))  # .../Assets/Prototypes/Proto -> project root
-    asmdef = os.path.join(project, "Assets", "_mine", "Game", "Scripts", "Game.asmdef")
+    asmdef = os.path.join(project, "Assets", "Game", "Scripts", "Game.asmdef")
     if not os.path.exists(asmdef):
         sys.exit(f"{project} does not look like a scaffold project (no {asmdef})")
     ns = json.load(open(asmdef, encoding="utf-8")).get("rootNamespace", "GameScaffold")
@@ -93,10 +93,10 @@ def main():
             continue
         for p in glob.glob(os.path.join(src_dir, "**", "*.cs"), recursive=True):
             rel = os.path.relpath(p, src_dir)
-            dst = os.path.join(project, "Assets", "_mine", "Game", dest_root, short, rel)
+            dst = os.path.join(project, "Assets", "Game", dest_root, short, rel)
             s = read(p)
             s = s.replace("MasterPrototypesBuilder.RegisterScenesInBuildSettings();",
-                          "FunTestKitBuilder.RegisterScene(ScenePath); // TODO: const string ScenePath = \"Assets/_mine/Game/Scenes/Main.unity\"")
+                          "FunTestKitBuilder.RegisterScene(ScenePath); // TODO: const string ScenePath = \"Assets/Game/Scenes/Main.unity\"")
             s = re.sub(r"^\s*using\s+\w*PrototypeLauncher\w*;\s*$", "", s, flags=re.M)
             if common_ns:
                 s = s.replace(f"using {common_ns};", f"using {ns};")
@@ -159,7 +159,7 @@ def main():
         print("  - Input System only: these still read UnityEngine.Input; move each to GameInput / TouchInputAdapter:")
         for f in legacy_input:
             print("      " + f)
-    print("  - delete Assets/_mine/Game/Scripts/Sample and Tests/SampleRulesTests.cs; keep the Kit")
+    print("  - delete Assets/Game/Scripts/Sample and Tests/SampleRulesTests.cs; keep the Kit")
     print("  - compile (python tools/unity_batch.py compile), build the scene, play a win and a lose, commit: chore(phase0): graduated from the test bed")
 
 

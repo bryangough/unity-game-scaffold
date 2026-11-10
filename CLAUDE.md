@@ -1,4 +1,4 @@
-# Game Scaffold (this repo is the template; a game made from it gets `templates/CLAUDE.md` as its own `CLAUDE.md`)
+# unity-game-scaffold (this repo is the template; a game made from it gets `templates/CLAUDE.md` as its own `CLAUDE.md`)
 
 A Unity 6 starting point for small mobile games, with the kit, the editor tools and the working method taken from
 three games built the same way. `README.md` is the front page; `docs/method.md`, `docs/tasks_guide.md` and

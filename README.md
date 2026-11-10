@@ -1,4 +1,4 @@
-# Game Scaffold
+# unity-game-scaffold
 
 A starting point for small Unity games, distilled from three games built the same way (a grid stealth puzzle, a
 colour-matching arcade puzzle, a physics runner): the code every one of them ended up needing, the editor tools that
@@ -29,8 +29,8 @@ Requirements: Unity 6000.6 (the exact version is in `ProjectSettings/ProjectVers
 Android / iOS / WebGL build modules for the builds you want, Python 3 for the tools, git.
 
 ```
-git clone <this repo> GameScaffold
-cd GameScaffold
+git clone https://github.com/<you>/unity-game-scaffold.git
+cd unity-game-scaffold
 python tools/new_game.py "My Game" --company "My Studio" --bundle com.mystudio.mygame
 ```
 

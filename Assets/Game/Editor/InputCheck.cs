@@ -14,7 +14,8 @@ namespace GameScaffold.Editor
     /// <see cref="GameInput"/> action through the real Input System (a virtual pad, <see cref="InputBot"/>), and checks
     /// that the action goes down while held and up when released, and that <see cref="InputMode"/> follows the device
     /// (a key → Keys, a pad button → Pad, mouse travel → Pointer). Writes <c>Builds/Checks/keys.md</c>. The save is
-    /// locked and the level put back after. The dev keys (1–9, F1) are left out: they load levels and open the dev menu.
+    /// locked for the run. The dev keys (1–9, F1) are left out: they load levels and open the dev menu. Restart (R) does
+    /// reload the scene, on the same level.
     /// <para>Grow it with the game's menus in <see cref="MenuSteps"/>, as the stealth game did: Esc in a level opens
     /// the pause with RESUME focused, the arrows move the focus, Esc closes it, the mouse clears the focus, Start and B
     /// do the same on a pad. Each step runs a few frames after the last; call <see cref="Check"/> to record a result.</para>
@@ -37,7 +38,6 @@ namespace GameScaffold.Editor
         {
             if (!EditorApplication.isPlaying) { Debug.LogWarning("[InputCheck] enter Play mode first"); return; }
             if (Keyboard.current == null) { Debug.LogWarning("[InputCheck] no keyboard device"); return; }
-            int level = SampleGame.CurrentLevel;
             log = new StringBuilder().AppendLine("# Keys and pad check").AppendLine()
                 .AppendLine($"{DateTime.Now:yyyy-MM-dd HH:mm}").AppendLine();
             fails = checks = 0;
@@ -84,7 +84,6 @@ namespace GameScaffold.Editor
             {
                 InputBot.End();
                 InputMode.Set(InputMode.Mode.Pointer);
-                if (SampleGame.CurrentLevel != level) SampleGame.LoadLevel(level);
                 log.AppendLine().AppendLine(fails == 0 ? $"**All {checks} passed.**" : $"**{fails} of {checks} failed.**");
                 Directory.CreateDirectory(Path.GetDirectoryName(ReportPath));
                 File.WriteAllText(ReportPath, log.ToString());

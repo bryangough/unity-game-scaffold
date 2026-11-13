@@ -36,12 +36,12 @@ namespace GameScaffold.Editor
             public Pose(string name, Action setup) { this.name = name; this.setup = setup; }
         }
 
-        /// <summary>The game's shots, in store order. The sample's three levels stand in for the real ones.</summary>
+        /// <summary>The game's shots, in store order. Until the game fills it in, one shot of whatever is on screen.
+        /// A pose is a level loaded by name and set up, for example:
+        /// <c>new Pose("01_crate_cone", () => { MyGame.LoadLevel(MyLevels.IndexOf("Vault")); MyGame.PlayMoves(5); })</c>.</summary>
         public static readonly List<Pose> Shots = new List<Pose>
         {
-            new Pose("01_first_level", () => SampleGame.LoadLevel(0)),
-            new Pose("02_second_level", () => SampleGame.LoadLevel(1)),
-            new Pose("03_third_level", () => SampleGame.LoadLevel(2)),
+            new Pose("01_current_view", null),
         };
 
         /// <summary>Frames between steps: long enough for a level load, a fade and the UI's first layout.</summary>
@@ -51,7 +51,6 @@ namespace GameScaffold.Editor
         public static void Run()
         {
             if (!EditorApplication.isPlaying) { Debug.LogWarning("[StoreCaptures] enter Play mode first"); return; }
-            int level = SampleGame.CurrentLevel;
             Progress.Suspended = true; // nothing the poses do is written to the save
 
             var steps = new List<Action>();
@@ -67,8 +66,7 @@ namespace GameScaffold.Editor
             steps.Add(() =>
             {
                 Progress.Reload();          // drop the in-memory demo progress; PlayerPrefs was never written
-                Progress.Suspended = false;
-                SampleGame.LoadLevel(level);
+                Progress.Suspended = false; // the game reloads its level here if its poses moved it
                 Debug.Log($"[StoreCaptures] {Shots.Count} shots at {Sizes.Length} sizes in {Root}/");
             });
             Captures.Sequence(Gap, steps.ToArray());

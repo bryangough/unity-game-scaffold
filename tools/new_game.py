@@ -171,7 +171,9 @@ next:
   2. In the Editor: {a.name} > Setup Project (once)  (TMP essentials, sound bank, the Main scene), then Play.
   3. Bringing a prototype from the idea test bed? python tools/graduate.py <path to Proto_NN_Name> "{folder}"
   4. Read CLAUDE.md, then fill in Assets/docs/TASKS.md: "Where the game is", the bar, phase 1.
-  5. Delete Assets/Game/Scripts/Sample/ (and its tests) once your own game manager is in; keep the Kit.
+  5. Once your own game manager is in, delete Assets/Game/Scripts/Sample/ and Tests/SampleRulesTests.cs; keep the Kit.
+     Two files point at the sample and are yours to rewire: Editor/SceneBuilder.cs (your scene) and
+     Tests/ColourBlindTests.cs (your colours). Then fill in StoreCaptures.Shots with your store poses.
 """)
 
 

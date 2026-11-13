@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <!-- The game's web page, selected by WebSize.ApplyWebPlayer before every web build. The game fills whatever frame
+         it is given (an itch.io embed, a phone's browser, fullscreen), never wider than --aspect (the UI is matched on
+         width) and as tall as the frame. No footer: Unity's default one pushed the canvas 19 px out of an 800-tall itch
+         frame. Sharpness capped at 2x. The canvas takes focus on load and on every tap, so keys work inside an iframe.
+         Restyle with the variables below; a landscape game sets --aspect to 16 / 9. From the stealth game. -->
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>{{{ PRODUCT_NAME }}}</title>
+    <link rel="icon" href="data:,">
+    <style>
+      :root {
+        --aspect: 9 / 16;      /* width / height of the widest the game is shown */
+        --back: #0b0d12;       /* page and canvas behind the game */
+        --text: #c9d3e0;
+        --accent: #7cf29a;     /* title and loading bar */
+        --track: #1f2633;      /* loading bar's empty part */
+      }
+      html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: var(--back); }
+      body { height: 100dvh; overscroll-behavior: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+      #frame { position: relative; height: 100%; width: min(100%, calc(100vh * var(--aspect))); width: min(100%, calc(100dvh * var(--aspect))); margin: 0 auto; }
+      #unity-canvas { display: block; width: 100%; height: 100%; background: var(--back); touch-action: none; outline: none; }
+      #loading { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+                 gap: 18px; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--text); }
+      #loading h1 { margin: 0; padding: 0 16px; text-align: center; font-size: clamp(22px, 7vw, 34px); letter-spacing: 0.06em;
+                    font-weight: 700; color: var(--accent); text-transform: uppercase; }
+      #bar { width: 60%; max-width: 260px; height: 6px; border-radius: 3px; background: var(--track); overflow: hidden; }
+      #fill { width: 0%; height: 100%; background: var(--accent); transition: width 0.15s; }
+      #warning { position: absolute; left: 8px; right: 8px; top: 8px; font-family: system-ui, sans-serif; font-size: 14px; }
+      #warning div { padding: 10px; border-radius: 6px; margin-bottom: 6px; color: #111; background: #ffd75e; }
+      #warning div.error { background: #ff6b6b; }
+    </style>
+  </head>
+  <body>
+    <div id="frame">
+      <canvas id="unity-canvas" tabindex="-1"></canvas>
+      <div id="loading"><h1>{{{ PRODUCT_NAME }}}</h1><div id="bar"><div id="fill"></div></div></div>
+      <div id="warning"></div>
+    </div>
+    <script>
+      var canvas = document.querySelector("#unity-canvas");
+      function showBanner(msg, type) {
+        var box = document.querySelector("#warning");
+        var div = document.createElement("div");
+        div.textContent = msg;
+        if (type == "error") div.className = "error";
+        box.appendChild(div);
+        if (type != "error") setTimeout(function () { box.removeChild(div); }, 5000);
+      }
+
+      var buildUrl = "Build";
+      var config = {
+        arguments: [],
+        dataUrl: buildUrl + "/{{{ DATA_FILENAME }}}",
+        frameworkUrl: buildUrl + "/{{{ FRAMEWORK_FILENAME }}}",
+        codeUrl: buildUrl + "/{{{ CODE_FILENAME }}}",
+#if MEMORY_FILENAME
+        memoryUrl: buildUrl + "/{{{ MEMORY_FILENAME }}}",
+#endif
+#if SYMBOLS_FILENAME
+        symbolsUrl: buildUrl + "/{{{ SYMBOLS_FILENAME }}}",
+#endif
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: {{{ JSON.stringify(COMPANY_NAME) }}},
+        productName: {{{ JSON.stringify(PRODUCT_NAME) }}},
+        productVersion: {{{ JSON.stringify(PRODUCT_VERSION) }}},
+        showBanner: showBanner,
+        // the screen's own sharpness, but no finer than 2x: a 3x phone would push 2.25x the pixels for no visible
+        // gain, and the web build's GPU budget is a phone browser's
+        devicePixelRatio: Math.min(window.devicePixelRatio || 1, 2),
+      };
+
+      var script = document.createElement("script");
+      script.src = buildUrl + "/{{{ LOADER_FILENAME }}}";
+      script.onload = function () {
+        createUnityInstance(canvas, config, function (progress) {
+          document.querySelector("#fill").style.width = (100 * progress) + "%";
+        }).then(function () {
+          document.querySelector("#loading").style.display = "none";
+          canvas.focus(); // keys work at once, without a first click into the frame
+        }).catch(function (message) {
+          showBanner(String(message), "error");
+        });
+      };
+      document.body.appendChild(script);
+      // keys and taps inside an itch.io iframe: take focus back whenever the game is touched
+      canvas.addEventListener("pointerdown", function () { canvas.focus(); });
+    </script>
+  </body>
+</html>

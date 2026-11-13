@@ -69,12 +69,17 @@ namespace GameScaffold.Editor
             return changed;
         }
 
-        /// <summary>Brotli (15–20 % smaller than gzip; the fallback keeps any host and plain http working) and the wasm built for size.</summary>
+        /// <summary>Brotli (15–20 % smaller than gzip; the fallback keeps any host and plain http working), the wasm
+        /// built for size, and the page (<c>Assets/WebGLTemplates/Game</c>: fills its frame, no footer, 2x sharpness cap).</summary>
         public static void ApplyWebPlayer()
         {
             PlayerSettings.WebGL.compressionFormat = WebGLCompressionFormat.Brotli;
             PlayerSettings.WebGL.decompressionFallback = true;
             UnityEditor.WebGL.UserBuildSettings.codeOptimization = UnityEditor.WebGL.WasmCodeOptimization.DiskSizeLTO;
+            PlayerSettings.WebGL.template = "PROJECT:Game";
+            // only the size of an itch.io embed: the page itself fills whatever frame it is given
+            PlayerSettings.defaultWebScreenWidth = 450;
+            PlayerSettings.defaultWebScreenHeight = 800;
         }
 
         /// <summary>Pads a PNG with clear pixels to sides that are multiples of 4, so it block-compresses. Returns true when it changed the file.</summary>

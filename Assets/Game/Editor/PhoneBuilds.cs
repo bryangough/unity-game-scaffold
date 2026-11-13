@@ -101,9 +101,7 @@ namespace GameScaffold.Editor
                     path = Path.Combine(Root, "Android", bundle ? BundleName : ApkName);
                     break;
                 case BuildTarget.WebGL:
-                    WebSize.ApplyWebPlayer(); // Brotli with the decompression fallback, wasm built for size
-                    PlayerSettings.defaultWebScreenWidth = 450;  // a portrait canvas on the page
-                    PlayerSettings.defaultWebScreenHeight = 800;
+                    WebSize.ApplyWebPlayer(); // Brotli with the fallback, wasm built for size, the page template
                     PlayerSettings.SetManagedStrippingLevel(named, ManagedStrippingLevel.High);
                     PlayerSettings.SetIl2CppCodeGeneration(named, Il2CppCodeGeneration.OptimizeSize);
                     path = Path.Combine(Root, "WebGL");

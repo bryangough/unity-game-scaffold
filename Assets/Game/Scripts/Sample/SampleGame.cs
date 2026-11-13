@@ -232,7 +232,7 @@ namespace GameScaffold
             Haptics.Play(Haptics.Strength.Medium);
             GameFeel.Shake(0.08f, 0.2f);
             GameFeel.Confetti(root != null ? root.position + Vector3.up : Vector3.up);
-            string starLine = new string('★', Progress.Count(stars)) + new string('☆', 3 - Progress.Count(stars));
+            string starLine = UIText.Stars(Progress.Count(stars), 3, TileLit);
             FunTestKit.ShowResult(true, $"{starLine}\nAverage reaction {Rules.AverageReaction:0.00} s{(fresh != 0 ? "   NEW" : "")}");
             if (nextButton != null && CurrentLevel < SampleLevels.Count - 1) nextButton.gameObject.SetActive(true);
         }

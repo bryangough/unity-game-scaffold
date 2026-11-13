@@ -58,5 +58,29 @@ namespace GameScaffold
             t.outlineWidth = width;
             t.outlineColor = new Color32(0, 0, 0, 220);
         }
+
+        /// <summary>
+        /// A star rating as rich text, earned ones filled in <paramref name="earned"/> colour and the rest hollow and dim:
+        /// "● ● ○". Circles, not ★ ☆: TMP's default font (LiberationSans) has no star, and a missing glyph draws as an
+        /// empty box (TMP logs "The character with Unicode value … was not found"). A game with its own font may set
+        /// <see cref="StarOn"/> / <see cref="StarOff"/> to ★ ☆ once that font has them.
+        /// </summary>
+        /// <param name="size">Relative to the line's text: the rating is the card's reward, so it is drawn larger.</param>
+        public static string Stars(int count, int max, Color earned, float size = 1.8f)
+        {
+            var sb = new System.Text.StringBuilder($"<size={Mathf.RoundToInt(size * 100)}%>");
+            string on = ColorUtility.ToHtmlStringRGB(earned);
+            for (int i = 0; i < max; i++)
+            {
+                if (i > 0) sb.Append(' ');
+                sb.Append(i < count ? $"<color=#{on}>{StarOn}</color>" : $"<color=#FFFFFF66>{StarOff}</color>");
+            }
+            return sb.Append("</size>").ToString();
+        }
+
+        public static string StarOn = "●", StarOff = "○"; // ● ○, both in LiberationSans
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetStars() { StarOn = "●"; StarOff = "○"; }
     }
 }

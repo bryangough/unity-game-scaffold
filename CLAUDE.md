@@ -21,10 +21,10 @@ three games built the same way. `README.md` is the front page; `docs/method.md`,
 
 | Path | What |
 |------|------|
-| `Assets/Game/Scripts/Kit/` | `Game.asmdef`, namespace `GameScaffold`. The kit: `FunTestKit`, `GameFeel`, `GameInput`, `TouchInputAdapter`, `InputMode`, `PhoneFit`, `AspectMatch`, `Orientation`, `Progress`, `MissionBook`, `AppFlow`, `ScreenFade`, `Sfx` + `SoundBank`, `Haptics`, `GameServices`, `DevMenu`, `UISkin`, `UIText`, `Credits`, `TextLinkOpener`, `ButtonPress`, `Breathe`, `DevFps`, `ExternalLink`, `InputBot`, `GameInfo`. |
+| `Assets/Game/Scripts/Kit/` | `Game.asmdef`, namespace `GameScaffold`. The kit: `FunTestKit`, `GameFeel`, `GameInput`, `TouchInputAdapter`, `InputMode`, `PhoneFit`, `AspectMatch`, `Orientation`, `Progress`, `MissionBook`, `Unlocks`, `AppFlow`, `ScreenFade`, `Sfx` + `SoundBank`, `Haptics`, `GameServices`, `DevMenu`, `UISkin`, `UIText`, `Credits`, `TextLinkOpener`, `ButtonPress`, `Breathe`, `DevFps`, `ExternalLink`, `InputBot`, `GameInfo`. |
 | `Assets/Game/Scripts/Sample/` | `SampleLevel(s)` (levels as data), `SampleRules` (plain C#), `SampleGame` (the manager that presents them). |
 | `Assets/Game/Editor/` | `Game.Editor.asmdef`. `Menus` (the menu root), `ProjectSetup`, `SceneBuilder` (**source of truth for the scene**), `FunTestKitBuilder`, `PhoneBuilds`, `WebSize`, `TextureCaps` + `MeshCaps`, `MusicBundles`, `StoreBuilds`, `AndroidNoInternet`, `SoundPicks`, `SfxImportRules`, `WavDownsample`, `ArtCutout`, `TestRunnerMenu`, `SavedDataMenu`, `ServicesMenu`, `Captures`, `ColourCheck`, `TextAudit`, `SmokeRun`, `BatchCapture`, `GameViewSize`. |
-| `Assets/Game/Tests/` | `Game.Tests.asmdef` (EditMode, NUnit): `ProgressTests`, `MissionBookTests`, `AppFlowTests`, `SampleRulesTests`, `ColourBlindTests`; `EditModeSuite.Run()` for a RunCommand. |
+| `Assets/Game/Tests/` | `Game.Tests.asmdef` (EditMode, NUnit): `ProgressTests`, `MissionBookTests`, `UnlocksTests`, `AppFlowTests`, `SampleRulesTests`, `ColourBlindTests`; `EditModeSuite.Run()` for a RunCommand. |
 | `Assets/docs/` | `TASKS.md`, `TASKS_archive.md`, `PLAYTEST_NOTES.md`, `art_prompts.md`, `names.md`, `initial/fun_test_record.md` (templates). |
 | `Assets/Plugins/` | `iOS/Haptics.mm`, `WebGL/Haptics.jslib`, `WebGL/ExternalLink.jslib`. |
 | `Assets/Settings/` | URP assets (`Mobile_RPAsset`, `PC_RPAsset`, renderers, the global settings). |

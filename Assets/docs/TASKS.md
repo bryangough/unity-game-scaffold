@@ -155,7 +155,8 @@ Owner: __OWNER__ · Executor: AI Assistant · Updated: __DATE__ (made from the s
   for key and pad players). A check that plays it through (`InputBot`).
 - [ ] **5.9 Story words.** A line per level and a card per chapter, in a doc first, then in the data; the text stays
   up until the player moves.
-- [ ] **5.10 Unlocks** (skins, backdrops) bought with stars; never between the player and the next level.
+- [ ] **5.10 Unlocks** (skins, backdrops, music) behind a lifetime count (`UnlockTable`: stars or missions, the first of
+  each kind free), a "new" dot on the collection button; never between the player and the next level.
 - [ ] **5.11 Ending and credits** ("A game by …", a link through `ExternalLink`).
 - [ ] **5.12 The ads / data slot** (`GameServices`): the calls at the moments, the do-nothing default; decision at 6.4.
 - [ ] **5.13 Replay bot.** Every level's solution played through the real game (`InputBot`, one tick a frame) and a

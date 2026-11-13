@@ -28,6 +28,8 @@ namespace GameScaffold
         public bool haptics = true;
         public bool unlockAll;   // Game > Saved Data > Unlock Everything (Testing)
         public int flags;        // one-time teaching lines already shown, as bits
+        public List<string> seenUnlocks = new List<string>();   // UnlockTable ids the player has looked at (the "new" dot)
+        public List<string> chosenUnlocks = new List<string>(); // "kind=id", the pick per kind (skin, backdrop, track)
     }
 
     /// <summary>
@@ -52,6 +54,8 @@ namespace GameScaffold
         {
             this.data = data ?? new ProgressData();
             if (this.data.levels == null) this.data.levels = new List<LevelRecord>();
+            if (this.data.seenUnlocks == null) this.data.seenUnlocks = new List<string>();
+            if (this.data.chosenUnlocks == null) this.data.chosenUnlocks = new List<string>();
         }
 
         public Progress() : this(new ProgressData()) { }
@@ -156,6 +160,36 @@ namespace GameScaffold
             if ((data.flags & flag) != 0) return false;
             Flags = data.flags | flag;
             return true;
+        }
+
+        // ---------------------------------------------------------------- unlocks (UnlockTable)
+
+        /// <summary>Has the player looked at this unlock in the collection? (No dot on it once seen.)</summary>
+        public bool Seen(string unlockId) => data.seenUnlocks.Contains(unlockId);
+
+        /// <summary>Marks unlocks seen (the collection screen opened); saves only when something changed.</summary>
+        public void MarkSeen(IEnumerable<string> unlockIds)
+        {
+            bool changed = false;
+            foreach (string id in unlockIds)
+                if (!data.seenUnlocks.Contains(id)) { data.seenUnlocks.Add(id); changed = true; }
+            if (changed) Save();
+        }
+
+        /// <summary>The unlock picked for a kind, or null; pass it through <see cref="UnlockTable.Resolve"/> before use.</summary>
+        public string Chosen(string kind)
+        {
+            string prefix = kind + "=";
+            foreach (string s in data.chosenUnlocks) if (s.StartsWith(prefix, StringComparison.Ordinal)) return s.Substring(prefix.Length);
+            return null;
+        }
+
+        public void Choose(string kind, string unlockId)
+        {
+            string prefix = kind + "=";
+            data.chosenUnlocks.RemoveAll(s => s.StartsWith(prefix, StringComparison.Ordinal));
+            if (!string.IsNullOrEmpty(unlockId)) data.chosenUnlocks.Add(prefix + unlockId);
+            Save();
         }
 
         public static int Count(int stars) => (stars & 1) + ((stars >> 1) & 1) + ((stars >> 2) & 1);

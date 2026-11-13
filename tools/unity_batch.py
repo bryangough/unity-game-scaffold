@@ -6,6 +6,8 @@
     python tools/unity_batch.py tests              # EditMode tests -> Builds/Checks/tests.xml, summary printed
     python tools/unity_batch.py build webgl        # a player build through Editor/PhoneBuilds.cs (webgl|android|ios)
     python tools/unity_batch.py capture            # Play mode for a moment, a 720x1280 shot -> Builds/Checks/views/batch.png
+    python tools/unity_batch.py capture Levels     # the same with one of the shell's screens up (Title, Levels, Play,
+                                                   # Result, Pause, Settings, Confirm) -> batch_Levels.png
 
 Why: an AI assistant (or CI) can verify a change without a human at the Editor. The Unity version comes from
 ProjectSettings/ProjectVersion.txt and the Hub's default install folder; set UNITY_PATH to override. Logs land in
@@ -160,10 +162,12 @@ if __name__ == "__main__":
     if what == "build":
         sys.exit(cmd_build(sys.argv[2] if len(sys.argv) > 2 else ""))
     if what == "capture":
-        shot = os.path.join(ROOT, "Builds", "Checks", "views", "batch.png")
+        screen = sys.argv[2] if len(sys.argv) > 2 else None
+        shot = os.path.join(ROOT, "Builds", "Checks", "views", f"batch_{screen}.png" if screen else "batch.png")
         if os.path.exists(shot):
             os.remove(shot)  # a stale picture must not pass for a new one
-        code, _, errors = run(["-executeMethod", editor_namespace() + ".BatchCapture.Batch"], "capture", graphics=True)
+        code, _, errors = run(["-executeMethod", editor_namespace() + ".BatchCapture.Batch"] + (["-shellScreen", screen] if screen else []),
+                              "capture", graphics=True)
         print("capture:", shot if os.path.exists(shot) else "MISSING")
         sys.exit(0 if code == 0 and os.path.exists(shot) else 1)
     sys.exit(__doc__)

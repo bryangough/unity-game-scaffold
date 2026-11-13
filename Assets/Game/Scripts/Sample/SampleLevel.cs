@@ -37,5 +37,14 @@ namespace GameScaffold
         public static int Count => All.Length;
 
         public static SampleLevel Get(int index) => All[Math.Clamp(index, 0, All.Length - 1)];
+
+        /// <summary>What the screens around the game see of the levels (<see cref="Shell.Catalog"/>).</summary>
+        public static readonly ILevelCatalog Catalog = new SampleCatalog();
+
+        private sealed class SampleCatalog : ILevelCatalog
+        {
+            public int Count => All.Length;
+            public string Title(int index) => Get(index).title;
+        }
     }
 }

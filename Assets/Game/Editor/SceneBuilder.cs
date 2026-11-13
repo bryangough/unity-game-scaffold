@@ -11,7 +11,7 @@ namespace GameScaffold.Editor
     /// <summary>
     /// <b>The source of truth for the scene.</b> <c>Game > Build Main Scene</c> regenerates
     /// <c>Assets/Game/Scenes/Main.unity</c> (light, camera, input adapter, the HUD canvas, the game manager, the
-    /// fun-test kit) and puts it in Build Settings. Nothing in the scene is hand-placed: change this file, rebuild,
+    /// fun-test kit, the <see cref="Shell"/> with the screens around the game) and puts it in Build Settings. Nothing in the scene is hand-placed: change this file, rebuild,
     /// commit both. Levels are data (<see cref="SampleLevels"/>), never scenes.
     /// </summary>
     public static class SceneBuilder
@@ -68,11 +68,7 @@ namespace GameScaffold.Editor
             sr.anchoredPosition = new Vector2(18f, -18f);
             sr.sizeDelta = new Vector2(480f, 80f);
 
-            Button next = MakeButton(canvasGo.transform, "Button_Next", font, "NEXT LEVEL (N)", 34f,
-                new Vector2(0.5f, 0f), new Vector2(0f, 230f), new Vector2(400f, 88f), new Color(0.2f, 0.6f, 0.3f, 0.95f));
-            next.gameObject.SetActive(false);
-
-            PrototypeUIHelper.CreateBottomDescriptionPanel(canvasGo, "Tap the lit tile before it goes dark. Arrows move, Enter taps. R restarts; keys 1-3 pick a level.");
+            PrototypeUIHelper.CreateBottomDescriptionPanel(canvasGo, "Tap the lit tile before it goes dark. Arrows move, Enter taps. Esc pauses, R restarts; keys 1-3 pick a level.");
 
             // the game manager
             var gmGo = new GameObject("SampleGame");
@@ -80,10 +76,12 @@ namespace GameScaffold.Editor
             var so = new SerializedObject(gm);
             so.FindProperty("cam").objectReferenceValue = cam;
             so.FindProperty("statusText").objectReferenceValue = status;
-            so.FindProperty("nextButton").objectReferenceValue = next;
             so.ApplyModifiedPropertiesWithoutUndo();
 
             FunTestKitBuilder.AddKit();
+            // the screens around the game: start, level select, result card, pause, settings. A UI skin, once the game
+            // has one, is wired here: shell.skin = AssetDatabase.LoadAssetAtPath<UISkin>("Assets/Game/UI/UISkin.asset");
+            new GameObject("Shell").AddComponent<Shell>();
             System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(ScenePath));
             EditorSceneManager.SaveScene(scene, ScenePath);
             FunTestKitBuilder.RegisterScene(ScenePath);

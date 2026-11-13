@@ -15,7 +15,9 @@ namespace GameScaffold.Editor
     /// that the action goes down while held and up when released, and that <see cref="InputMode"/> follows the device
     /// (a key → Keys, a pad button → Pad, mouse travel → Pointer). Writes <c>Builds/Checks/keys.md</c>. The save is
     /// locked for the run. The dev keys (1–9, F1) are left out: they load levels and open the dev menu. Restart (R) does
-    /// reload the scene, on the same level.
+    /// reload the scene, on the same level. The <see cref="Shell"/>'s menus keep still while the bindings are pressed
+    /// (<see cref="Shell.IgnoreInput"/>), then get their own steps: Esc and Start open the pause with RESUME focused,
+    /// Esc and B close it.
     /// <para>Grow it with the game's menus in <see cref="MenuSteps"/>, as the stealth game did: Esc in a level opens
     /// the pause with RESUME focused, the arrows move the focus, Esc closes it, the mouse clears the focus, Start and B
     /// do the same on a pad. Each step runs a few frames after the last; call <see cref="Check"/> to record a result.</para>
@@ -42,6 +44,7 @@ namespace GameScaffold.Editor
                 .AppendLine($"{DateTime.Now:yyyy-MM-dd HH:mm}").AppendLine();
             fails = checks = 0;
             InputBot.Begin();
+            Shell.IgnoreInput = true; // the bindings are pressed one by one: no menu should open or be clicked meanwhile
             InputMode.Set(InputMode.Mode.Pointer);
             _ = InputBot.Pad; // added now, so its first frame is behind it
 
@@ -78,11 +81,14 @@ namespace GameScaffold.Editor
             }
             steps.Add(() => Check("mouse travel sets the mode to Pointer", InputMode.Current == InputMode.Mode.Pointer));
 
+            steps.Add(() => Shell.IgnoreInput = false);
+            if (Shell.Instance != null) ShellSteps(steps);
             steps.AddRange(MenuSteps);
 
             steps.Add(() =>
             {
                 InputBot.End();
+                Shell.IgnoreInput = false;
                 InputMode.Set(InputMode.Mode.Pointer);
                 log.AppendLine().AppendLine(fails == 0 ? $"**All {checks} passed.**" : $"**{fails} of {checks} failed.**");
                 Directory.CreateDirectory(Path.GetDirectoryName(ReportPath));
@@ -91,6 +97,31 @@ namespace GameScaffold.Editor
                 else Debug.LogError($"[InputCheck] {fails} of {checks} failed: {ReportPath}");
             });
             Captures.Sequence(Gap, steps.ToArray());
+        }
+
+        /// <summary>The shell's pause on keys and a pad, from a level freshly reloaded into play.</summary>
+        private static void ShellSteps(List<Action> steps)
+        {
+            string Focused()
+            {
+                var es = UnityEngine.EventSystems.EventSystem.current;
+                return es != null && es.currentSelectedGameObject != null ? es.currentSelectedGameObject.name : "nothing";
+            }
+            steps.Add(() => { Shell.Go(Shell.Play); FunTestKit.Restart(); });
+            steps.Add(() => { });
+            steps.Add(() => InputBot.PressControl("<Keyboard>/escape"));
+            steps.Add(() =>
+            {
+                Check("Esc in play opens the pause", Shell.Flow.Top == Shell.Pause);
+                Check($"the pause focuses RESUME for a key player (focused: {Focused()})", Focused() == "Button_Resume");
+                InputBot.ReleaseKeys();
+            });
+            steps.Add(() => InputBot.PressControl("<Keyboard>/escape"));
+            steps.Add(() => { Check("Esc closes the pause", !Shell.Flow.HasOverlay); InputBot.ReleaseKeys(); });
+            steps.Add(() => InputBot.PressControl("<Gamepad>/start"));
+            steps.Add(() => { Check("Start on a pad opens the pause", Shell.Flow.Top == Shell.Pause); InputBot.ReleaseKeys(); });
+            steps.Add(() => InputBot.PressControl("<Gamepad>/buttonEast"));
+            steps.Add(() => { Check("B on a pad closes the pause", !Shell.Flow.HasOverlay); InputBot.ReleaseKeys(); });
         }
 
         /// <summary>Records one result in the report (only failures are listed one by one, with the count at the end).</summary>

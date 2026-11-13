@@ -12,6 +12,9 @@ namespace GameScaffold.Editor
     /// view the player loop barely ticks (frame 4 after 120 editor ticks), so Update-driven state never advances; a
     /// game that has to run for a while needs the real Editor (<see cref="SmokeRun"/>). The log carries the camera,
     /// every renderer and the picture's mean brightness, so the result can be read without opening the picture.
+    /// <para><c>capture &lt;screen&gt;</c> (<c>-shellScreen</c>) poses one of the <see cref="Shell"/>'s screens first
+    /// (Title, Levels, Play, Result, Pause, Settings, Confirm) and writes <c>batch_&lt;screen&gt;.png</c>: showing a
+    /// screen needs no frames, so every menu can be looked at headless. The save is not written.</para>
     /// </summary>
     public static class BatchCapture
     {
@@ -49,6 +52,8 @@ namespace GameScaffold.Editor
             foreach (Light l in Object.FindObjectsByType<Light>()) { l.enabled = false; l.enabled = true; }
             // one render to a texture carries the change; the real shot comes after it (a bare Camera.Render() with no
             // Game view crashes a batch Editor)
+            string screen = Arg("-shellScreen");
+            if (screen != null) Pose(screen);
             Captures.Shot("batch_warm");
             try { File.Delete("Builds/Checks/views/batch_warm.png"); } catch { }
 
@@ -57,8 +62,9 @@ namespace GameScaffold.Editor
                 sb.AppendLine($"  {r.name}: {r.sharedMaterial?.shader?.name} {r.sharedMaterial?.color} bounds {r.bounds.center} {r.bounds.size}");
             Debug.Log($"[BatchCapture] camera {Camera.main?.transform.position} size {Camera.main?.orthographicSize}, {Object.FindObjectsByType<Light>().Length} light(s)\n{sb}");
 
-            bool ok = Captures.Shot("batch");
-            string path = Path.GetFullPath("Builds/Checks/views/batch.png");
+            string shot = screen != null ? "batch_" + screen : "batch";
+            bool ok = Captures.Shot(shot);
+            string path = Path.GetFullPath($"Builds/Checks/views/{shot}.png");
             if (ok)
             {
                 // a number to read without the picture: the mean brightness (0..1); under 0.05 means an unlit or empty view
@@ -73,6 +79,23 @@ namespace GameScaffold.Editor
             else Debug.LogError("[BatchCapture] no main camera in the scene: nothing captured");
             EditorApplication.ExitPlaymode();
             EditorApplication.Exit(ok && File.Exists(path) ? 0 : 1);
+        }
+
+        private static string Arg(string name)
+        {
+            string[] args = System.Environment.GetCommandLineArgs();
+            for (int i = 0; i < args.Length - 1; i++) if (args[i] == name) return args[i + 1];
+            return null;
+        }
+
+        /// <summary>Puts one of the shell's screens up; a result is a sample win with two stars.</summary>
+        private static void Pose(string screen)
+        {
+            if (Shell.Instance == null) { Debug.LogWarning("[BatchCapture] no Shell in the scene: capturing the opening frame"); return; }
+            Progress.Suspended = true;
+            if (screen == Shell.Result) Shell.ShowResult(true, Progress.Star1 | Progress.Star2, "A sample result line");
+            else if (screen == Shell.Pause || screen == Shell.Settings || screen == Shell.Confirm) { Shell.Go(Shell.Play); Shell.Open(screen); }
+            else Shell.Go(screen);
         }
     }
 }

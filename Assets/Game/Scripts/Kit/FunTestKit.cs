@@ -31,6 +31,8 @@ namespace GameScaffold
         public static event Action<bool> OnResult;
         /// <summary>Optional override for the R key while the result is up (go to the next level after a win, say).</summary>
         public static Action OnRestartKey;
+        /// <summary>While true the countdown waits (a menu is over the game: <see cref="Shell"/> sets it).</summary>
+        public static bool Hold;
 
         private bool over;
         private GameObject restartButton;
@@ -58,6 +60,7 @@ namespace GameScaffold
         {
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
             Instance = this;
+            Hold = false;
             Application.runInBackground = true;
             EnsureEventSystem();
             BuildUI();
@@ -206,7 +209,7 @@ namespace GameScaffold
                 return;
             }
 
-            if (timerRunning && !over)
+            if (timerRunning && !over && !Hold)
             {
                 timeLeft -= Time.deltaTime;
                 if (timeLeft <= 0f)

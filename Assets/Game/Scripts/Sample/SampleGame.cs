@@ -10,8 +10,10 @@ namespace GameScaffold
     /// hangs together, and is meant to be deleted once your own game is in: the level that is current lives in the save
     /// (so R, a reload and quitting all come back to it), the scene is built by <c>Game > Build Main Scene</c>, the
     /// tiles are primitives, input comes from <see cref="TouchInputAdapter"/> and <see cref="GameInput"/>, feedback
-    /// from <see cref="GameFeel"/>, <see cref="Sfx"/> and <see cref="Haptics"/>, the result from <see cref="FunTestKit"/>,
-    /// the save from <see cref="Progress"/>, and the ads / data slot from <see cref="GameServices"/>.
+    /// from <see cref="GameFeel"/>, <see cref="Sfx"/> and <see cref="Haptics"/>, the clock from <see cref="FunTestKit"/>,
+    /// the save from <see cref="Progress"/>, and the ads / data slot from <see cref="GameServices"/>. The screens
+    /// around it (start, level select, result card, pause, settings) are the <see cref="Shell"/>'s: this class hands
+    /// it the levels, ticks only while <see cref="Shell.Playing"/> and ends a level with <see cref="Shell.ShowResult"/>.
     /// </summary>
     [DefaultExecutionOrder(-600)] // before FunTestKit (-500), which reads the camera's ortho size in Awake
     public class SampleGame : MonoBehaviour
@@ -27,7 +29,6 @@ namespace GameScaffold
 
         [SerializeField] private Camera cam;
         [SerializeField] private TextMeshProUGUI statusText;
-        [SerializeField] private Button nextButton;
 
         public SampleRules Rules { get; private set; }
         private SampleLevel level;
@@ -49,6 +50,7 @@ namespace GameScaffold
         private void Awake()
         {
             Instance = this;
+            Shell.Catalog = SampleLevels.Catalog;               // before the shell wakes: it draws the level select from this
             if (cam == null) cam = Camera.main;
             level = SampleLevels.Get(CurrentLevel);
             Rules = new SampleRules(level, seed: CurrentLevel * 7919 + 1);
@@ -63,7 +65,6 @@ namespace GameScaffold
             Sfx.PlayMusic("Music1");                            // silent until a track is imported (Editor/SoundPicks.cs)
             if (level.seconds > 0f) FunTestKit.StartTimer(level.seconds, () => { Rules.OutOfTime(); });
             FunTestKit.Story($"<b>{level.title}</b>\n{level.callout}");
-            if (nextButton != null) { nextButton.gameObject.SetActive(false); nextButton.onClick.AddListener(NextLevel); }
             startedAt = Time.time;
             UpdateStatus();
             // the dev menu (DEV tab or F1): what a tester needs mid-play
@@ -129,15 +130,11 @@ namespace GameScaffold
 
         private void Update()
         {
-            if (FunTestKit.IsOver)
-            {
-                if (Rules.Won && GameInput.Next.WasPressedThisFrame()) NextLevel();
-                return;
-            }
+            if (FunTestKit.IsOver) return;                      // the result card has NEXT / RETRY / LEVELS
             for (int i = 0; i < SampleLevels.Count && i < GameInput.SlotKeys; i++)
                 if (GameInput.Slot(i).WasPressedThisFrame() && (Application.isEditor || Debug.isDebugBuild)) { LoadLevel(i); return; }
 
-            if (PhoneFit.Paused) return;
+            if (PhoneFit.Paused || !Shell.Playing) return;      // the app is in the background, or a menu is up
             Rules.Tick(Time.deltaTime);
             Sfx.MusicIntensity(level.missesAllowed > 0 ? (float)Rules.Misses / level.missesAllowed : 0f);
 
@@ -232,9 +229,7 @@ namespace GameScaffold
             Haptics.Play(Haptics.Strength.Medium);
             GameFeel.Shake(0.08f, 0.2f);
             GameFeel.Confetti(root != null ? root.position + Vector3.up : Vector3.up);
-            string starLine = UIText.Stars(Progress.Count(stars), 3, TileLit);
-            FunTestKit.ShowResult(true, $"{starLine}\nAverage reaction {Rules.AverageReaction:0.00} s{(fresh != 0 ? "   NEW" : "")}");
-            if (nextButton != null && CurrentLevel < SampleLevels.Count - 1) nextButton.gameObject.SetActive(true);
+            Shell.ShowResult(true, stars, $"Average reaction {Rules.AverageReaction:0.00} s{(fresh != 0 ? "   NEW" : "")}");
         }
 
         private void Lose(string cause)
@@ -244,21 +239,11 @@ namespace GameScaffold
             Haptics.Play(Haptics.Strength.Heavy);
             GameFeel.HitStop(0.07f);
             GameFeel.Shake(0.25f, 0.3f);
-            FunTestKit.ShowResult(false, cause);
+            Shell.ShowResult(false, 0, cause);
         }
 
-        private void NextLevel()
-        {
-            if (CurrentLevel >= SampleLevels.Count - 1) return;
-            GameServices.Current.BetweenLevels(CurrentLevel + 1, () => LoadLevel(CurrentLevel + 1));
-        }
-
-        /// <summary>Opens a level: the save remembers it, and the scene reloads around it.</summary>
-        public static void LoadLevel(int index)
-        {
-            CurrentLevel = Mathf.Clamp(index, 0, SampleLevels.Count - 1);
-            FunTestKit.Restart();
-        }
+        /// <summary>Opens a level in play: the save remembers it, and the scene reloads around it.</summary>
+        public static void LoadLevel(int index) => Shell.OpenLevel(index);
 
         private void OnDestroy() { if (Instance == this) Instance = null; }
     }

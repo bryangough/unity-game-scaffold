@@ -149,13 +149,18 @@ Owner: __OWNER__ · Executor: AI Assistant · Updated: __DATE__ (made from the s
 
 *Done:* —
 
-- [ ] **5.1 The save** (`Progress`): solved, best, stars per level; settings; the last level; tests. **5.2 Start
-  screen** (PLAY to the next unsolved; a new player skips it). **5.3 Level select** with stars, by chapter.
-  **5.4 Result card** (stars landing, best, NEXT / RETRY / LEVELS). **5.5 Pause and settings** (music, sound,
-  vibration, How To Play, reset). **5.6 How To Play** (one picture and one line per rule, captured from the real
-  game). **5.7 Hints** (after N failures, a ghost that plays the solution; using it costs the mastery star).
-- [ ] **5.8 Keys and a pad on the menus** (`InputMode`: a focused button, arrows, Enter / Space, Esc; prompts only
-  for key and pad players). A check that plays it through (`InputBot`).
+- [ ] **5.1 Into the shell.** The start screen (PLAY to the next unsolved; a new player skips it), the level select
+  with stars, the result card (stars landing, NEXT / RETRY / LEVELS), the pause and the settings (music, sound,
+  vibration, reset) come with the kit (`Shell`): the manager sets `Shell.Catalog`, builds `Shell.CurrentLevel`,
+  ticks only while `Shell.Playing`, ends a level with `Shell.ShowResult` and opens one with `Shell.OpenLevel`. What
+  the stars mean is the game's (`Progress.RecordWin`). *Try:* from the icon to level 3 and back to the level list
+  without a word of explanation; then again on the keyboard only.
+- [ ] **5.2 The game's own screens**, made from `ShellUI` and pushed on `Shell.Flow` as overlays: chapters on the
+  level select if there are any, the best on the result card. **5.6 How To Play** (one picture and one line per
+  rule, captured from the real game; a row in the settings). **5.7 Hints** (after N failures, a ghost that plays the
+  solution; using it costs the mastery star).
+- [ ] **5.8 Keys and a pad on the game's own screens** (the shell's already work: a focused button, arrows, Enter /
+  Space, Esc; `InputMode` shows prompts only to key and pad players). Add the game's steps to `InputCheck.MenuSteps`.
 - [ ] **5.9 Story words.** A line per level and a card per chapter, in a doc first, then in the data; the text stays
   up until the player moves.
 - [ ] **5.10 Unlocks** (skins, backdrops, music) behind a lifetime count (`UnlockTable`: stars or missions, the first of

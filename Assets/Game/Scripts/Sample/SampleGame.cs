@@ -154,8 +154,7 @@ namespace GameScaffold
                 int n = level.grid;
                 int x = Mathf.Clamp(cursor % n + dir.x, 0, n - 1);
                 int z = Mathf.Clamp(cursor / n + dir.y, 0, n - 1);
-                cursor = z * n + x;
-                InputMode.Set(InputMode.Mode.Keys);
+                cursor = z * n + x; // InputMode has already switched to Keys or Pad from the press itself
             }
             if (GameInput.Submit.WasPressedThisFrame() && InputMode.UsingKeysOrPad) Tap(cursor);
 

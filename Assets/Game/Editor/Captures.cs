@@ -16,8 +16,10 @@ namespace GameScaffold.Editor
     /// </summary>
     public static class Captures
     {
-        /// <summary>Writes <c>Builds/Checks/views/&lt;name&gt;.png</c>; false when there is no main camera.</summary>
-        public static bool Shot(string name, int w = 720, int h = 1280)
+        public const string ViewsDir = "Builds/Checks/views";
+
+        /// <summary>Writes <c>&lt;dir&gt;/&lt;name&gt;.png</c> (<see cref="ViewsDir"/> by default); false when there is no main camera.</summary>
+        public static bool Shot(string name, int w = 720, int h = 1280, string dir = ViewsDir)
         {
             Camera cam = Camera.main;
             if (cam == null) return false;
@@ -43,11 +45,11 @@ namespace GameScaffold.Editor
             tex.ReadPixels(new Rect(0, 0, w, h), 0, 0);
             tex.Apply();
             RenderTexture.active = null;
-            Directory.CreateDirectory("Builds/Checks/views");
-            File.WriteAllBytes($"Builds/Checks/views/{name}.png", tex.EncodeToPNG());
+            Directory.CreateDirectory(dir);
+            File.WriteAllBytes($"{dir}/{name}.png", tex.EncodeToPNG());
             Object.DestroyImmediate(tex);
             Object.DestroyImmediate(rt);
-            Debug.Log($"[Captures] Builds/Checks/views/{name}.png ({w}x{h})");
+            Debug.Log($"[Captures] {dir}/{name}.png ({w}x{h})");
             return true;
         }
 

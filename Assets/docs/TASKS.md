@@ -174,7 +174,7 @@ Owner: __OWNER__ · Executor: AI Assistant · Updated: __DATE__ (made from the s
 - [ ] **6.1 The name** (checked on itch.io, Play, the App Store; the bundle id). **6.2 Icon, logo, feature graphic.**
   **6.3 Store text** (`Store/listing.md`; __OWNER__ edits). **6.4 Privacy and the ads decision** (default: nothing
   collected; `Store/privacy.md` hosted; `AndroidNoInternet` keeps the apk at VIBRATE only). **6.5 Licences**
-  (`Store/licences.md`: every source that ships). **6.6 Screenshots** (a capture tool in Play mode, posed by level
+  (`Store/licences.md`: every source that ships). **6.6 Screenshots** (`StoreCaptures` in Play mode, posed by level
   title, 1080 × 1920 and 1290 × 2796).
 - [ ] **6.7 itch.io.** __OWNER__ makes the page; `Build > Store > Zip Web Build`; tested in Chrome, Firefox and
   Safari on a desktop and a phone.

@@ -66,8 +66,8 @@ both stores change them from time to time.
 
 ## Screenshots and graphics
 
-Made by a capture tool in Play mode that finds each scene by name and poses it, so renumbering levels never breaks a
-shot. Keep them in `Store/Screenshots/<store>_<w>x<h>/`.
+Made by `__GAME__ > Store > Capture Screenshots (Play mode)` (`StoreCaptures`: the game lists its poses, each found by
+name so renumbering levels never breaks a shot), at every store size, into `Store/Screenshots/<store>_<w>x<h>/`.
 
 | What | Size | Notes |
 |------|------|-------|

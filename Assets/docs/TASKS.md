@@ -135,8 +135,8 @@ Owner: __OWNER__ · Executor: AI Assistant · Updated: __DATE__ (made from the s
   one track per chapter. __OWNER__ shortlists by ear.
 - [ ] **4.5 UI skin.** A `UISkin` asset built from the UI pack by an editor script (a few sprites and one font, never
   the pack copied in); flat boxes until then.
-- [ ] **4.6 Colour-blind check.** `Checks > Colour Check`; the colours a player must tell apart in static fields with a
-  test (`ColourBlindTests`).
+- [ ] **4.6 Colour-blind check.** `Checks > Colour Check`; the colours a player must tell apart in static fields, every
+  pair checked by `ColourCheck.ClosePairs` in a test (`ColourBlindTests`).
 - [ ] **4.7 Icon and title logo** (6.2 feeds the store); the start screen. Generated images go through `Art > Cut Out
   Generated Art`; the prompts live in `art_prompts.md`.
 - [ ] **4.8 Readability pass.** `Checks > Text Fit Audit` clean at the floors (body ≥ 24, captions ≥ 20, button labels

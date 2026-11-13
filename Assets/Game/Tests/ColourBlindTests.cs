@@ -6,33 +6,37 @@ namespace GameScaffold.Tests
 {
     /// <summary>
     /// The colours a player must tell apart, checked under normal vision, deuteranopia, protanopia, tritanopia and
-    /// greyscale (Machado et al. 2009, full severity). Put every "this means X" colour in a static field and add a
-    /// pair here; a colour-blind player then never has to be told.
+    /// greyscale (see <see cref="ColourCheck"/>). Put every "this means X" colour in a static field and add it to the
+    /// palette below; every pair is compared, so a colour-blind player never has to be told.
     /// </summary>
     public class ColourBlindTests
     {
+        private static readonly string[] Names = { "dark", "lit", "cursor" };
+        private static readonly Color[] Palette = { SampleGame.TileDark, SampleGame.TileLit, SampleGame.TileCursor };
+
         [Test]
-        public void LitTile_ReadsApartFromADarkTile_InEveryVisionMode()
+        public void Palette_EveryPairReadsApart_InEveryVisionMode()
         {
-            for (int i = 0; i < ColourCheck.Filters.Length; i++)
-            {
-                Color lit = ColourCheck.Filters[i](SampleGame.TileLit);
-                Color dark = ColourCheck.Filters[i](SampleGame.TileDark);
-                Assert.Greater(ColourCheck.Distance(lit, dark), 0.5f, $"{ColourCheck.FilterNames[i]}: lit vs dark");
-            }
-            // and in plain brightness, for total colour blindness and a dim screen
-            Assert.Greater(ColourCheck.Luminance(SampleGame.TileLit) - ColourCheck.Luminance(SampleGame.TileDark), 0.35f, "lit must also be clearly brighter");
+            var close = ColourCheck.ClosePairs(Names, Palette);
+            Assert.IsEmpty(close, "Too close:\n" + string.Join("\n", close));
         }
 
         [Test]
-        public void Cursor_ReadsApartFromALitTile_InColourVisionModes()
+        public void LitTile_IsClearlyBrighterThanADarkTile()
         {
-            for (int i = 0; i < 4; i++)
-            {
-                Color lit = ColourCheck.Filters[i](SampleGame.TileLit);
-                Color cursor = ColourCheck.Filters[i](SampleGame.TileCursor);
-                Assert.Greater(ColourCheck.Distance(lit, cursor), 0.35f, $"{ColourCheck.FilterNames[i]}: cursor vs lit");
-            }
+            // brightness alone carries "lit", for total colour blindness and a dim screen in sunlight
+            float dL = ColourCheck.Lightness(SampleGame.TileLit) - ColourCheck.Lightness(SampleGame.TileDark);
+            Assert.Greater(dL, 30f, $"lit is only {dL:0.0} L* brighter than dark");
+        }
+
+        [Test]
+        public void ClosePairs_FlagsRedAndGreenOfTheSameLightness()
+        {
+            // the classic trap: a red and a green a deuteranope cannot separate
+            var close = ColourCheck.ClosePairs(new[] { "red", "green" },
+                new[] { new Color(0.8f, 0.3f, 0.2f), new Color(0.45f, 0.5f, 0.15f) });
+            Assert.AreEqual(1, close.Count);
+            StringAssert.Contains("deutan", close[0]);
         }
     }
 }

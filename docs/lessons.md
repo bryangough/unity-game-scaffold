@@ -94,7 +94,9 @@ they could be.
 - **Unity re-encodes every web sound to ~128 kbps AAC**, whatever the import settings say. The web build's music is
   therefore encoded outside Unity (`tools/web_music.py`: 40 kbps mono MP3), packed as data in the same bundles and
   decoded by the browser; the jelly game's download went 24.8 → 12.0 MB. Time the loop by the source's length, not
-  the decoded clip's: MP3 encoders pad the ends.
+  the decoded clip's: MP3 encoders pad the ends. **The encoder is optional** (ffmpeg on PATH, or `pip install
+  soundfile`): without one the web build packs Unity's clips, about three times the size, and says so in one warning.
+  The scaffold's MP3 path compiles for WebGL and falls back cleanly, but has not yet shipped in a web build.
 - **Sound libraries stay outside the project.** A picks list, an import menu, mobile import rules (mono, 22 kHz,
   ADPCM for short one-shots, Vorbis for loops, Streaming for music), and a WAV downsampler so a 30 MB stem lands in
   git at 4.6 MB. A pack with no licence to read was removed before release.

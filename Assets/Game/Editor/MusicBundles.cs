@@ -13,13 +13,15 @@ namespace GameScaffold.Editor
     /// played), and <see cref="Sfx"/> loads a bundle when its track is first wanted. A bundle is Unity's packed format,
     /// not a playable audio file, so licensed tracks never sit on a web server as loose music. Bundles are built per
     /// platform, so <see cref="PhoneBuilds"/> rebuilds them before every player build. The folder is git-ignored.
-    /// <para><b>The web build packs small MP3s instead of clips.</b> Unity re-encodes all web audio to ~128 kbps AAC
+    /// <para><b>The web build packs small MP3s instead of clips, when an encoder is installed (optional).</b> Unity re-encodes all web audio to ~128 kbps AAC
     /// whatever the import settings say, so for WebGL each stem is encoded by <c>tools/web_music.py</c> (ffmpeg or the
     /// Python soundfile package) as a 40 kbps mono MP3 into <see cref="WebDir"/> (git-ignored, re-encoded only when the
     /// source is newer), packed as .bytes data with a <c>length</c> file holding the source's exact length: a decoded
     /// MP3's length is padded by the encoder, and a loop timed from it drifts. <see cref="Sfx"/> decodes them in the
-    /// browser. The jelly game's web download went 24.8 → 12.0 MB. With no encoder installed the clips are packed as
-    /// before, with a warning.</para>
+    /// browser. The jelly game's web download went 24.8 → 12.0 MB. <b>Neither ffmpeg nor soundfile is required:</b> with
+    /// no python, no encoder, a missing script or a stem that fails, the web build packs Unity's clips as the phones do
+    /// (bigger, nothing else changes) and logs one warning saying why; it never fails the build. Not yet tried end to end
+    /// on a web build with real music.</para>
     /// </summary>
     public static class MusicBundles
     {
@@ -53,8 +55,14 @@ namespace GameScaffold.Editor
             if (File.Exists(OutDir + ".meta")) File.Delete(OutDir + ".meta");
             Directory.CreateDirectory(OutDir);
             if (builds.Count == 0) { Debug.Log("[Music] no tracks to pack"); AssetDatabase.Refresh(); return true; } // a game without music yet still builds
-            if (target == BuildTarget.WebGL && !EncodeForWeb(builds)) Debug.LogWarning("[Music] no MP3 encoder (ffmpeg, or pip install soundfile): " +
-                "the web build packs Unity's clips, ~128 kbps AAC, about three times the size");
+            if (target == BuildTarget.WebGL)
+            {
+                string why;
+                try { why = EncodeForWeb(builds); }
+                catch (System.Exception e) { why = e.Message; } // never fails the build: the clips are the fallback
+                if (why != null) Debug.LogWarning($"[Music] web music not encoded ({why}): the web build packs Unity's clips instead, " +
+                    "~128 kbps AAC, about three times the size. Optional: put ffmpeg on PATH or pip install soundfile.");
+            }
 
             AssetBundleManifest m = BuildPipeline.BuildAssetBundles(OutDir, builds.ToArray(), BuildAssetBundleOptions.ChunkBasedCompression, target);
             if (m == null) { Debug.LogError($"[Music] bundles failed for {target}"); return false; }
@@ -72,9 +80,14 @@ namespace GameScaffold.Editor
             return true;
         }
 
-        /// <summary>Swaps each build's clips for encoded MP3 .bytes and a length file; false (builds untouched) when there is no encoder.</summary>
-        private static bool EncodeForWeb(List<AssetBundleBuild> builds)
+        public const string EncoderScript = "tools/web_music.py";
+        private const int EncodeTimeoutMs = 120000;
+
+        /// <summary>Swaps each build's clips for encoded MP3 .bytes and a length file. Null on success; otherwise why
+        /// not, with <paramref name="builds"/> untouched (no python, no encoder, a stem that failed).</summary>
+        private static string EncodeForWeb(List<AssetBundleBuild> builds)
         {
+            if (!File.Exists(EncoderScript)) return EncoderScript + " is missing";
             var encoded = new List<AssetBundleBuild>();
             foreach (AssetBundleBuild b in builds)
             {
@@ -87,9 +100,10 @@ namespace GameScaffold.Editor
                     string dst = $"{dir}/{Path.GetFileNameWithoutExtension(src)}.bytes";
                     if (!File.Exists(dst) || File.GetLastWriteTimeUtc(dst) < File.GetLastWriteTimeUtc(src))
                     {
-                        int code = Python("tools/web_music.py", Path.GetFullPath(src), Path.GetFullPath(dst));
-                        if (code == 2) return false;
-                        if (code != 0 || !File.Exists(dst)) { Debug.LogError($"[Music] encoding {src} failed ({code})"); return false; }
+                        if (File.Exists(dst)) File.Delete(dst); // never pack a half-written or stale stem
+                        string why = Python(EncoderScript, Path.GetFullPath(src), Path.GetFullPath(dst));
+                        if (why != null) return why;
+                        if (!File.Exists(dst) || new FileInfo(dst).Length == 0) return $"{Path.GetFileName(src)} came out empty";
                     }
                     names.Add(dst);
                 }
@@ -102,15 +116,17 @@ namespace GameScaffold.Editor
             AssetDatabase.Refresh(); // import the .bytes and length files before they are packed
             builds.Clear();
             builds.AddRange(encoded);
-            return true;
+            return null;
         }
 
-        /// <summary>Runs a script in tools/ with python (or python3); the exit code, or 2 when there is no python.</summary>
-        private static int Python(string script, params string[] args)
+        /// <summary>Runs a script with python (or python3): null when it exits 0, otherwise why not.</summary>
+        private static string Python(string script, params string[] args)
         {
             string line = "\"" + script + "\" " + string.Join(" ", System.Array.ConvertAll(args, a => "\"" + a + "\""));
+            string last = "no python on PATH";
             foreach (string exe in new[] { "python", "python3" })
             {
+                System.Diagnostics.Process p;
                 try
                 {
                     var psi = new System.Diagnostics.ProcessStartInfo(exe, line)
@@ -118,17 +134,24 @@ namespace GameScaffold.Editor
                         UseShellExecute = false, CreateNoWindow = true, RedirectStandardError = true,
                         WorkingDirectory = Path.GetFullPath("."),
                     };
-                    using (var p = System.Diagnostics.Process.Start(psi))
-                    {
-                        string err = p.StandardError.ReadToEnd();
-                        p.WaitForExit();
-                        if (p.ExitCode != 0 && p.ExitCode != 2) Debug.LogWarning($"[Music] {script}: {err}");
-                        return p.ExitCode;
-                    }
+                    p = System.Diagnostics.Process.Start(psi);
                 }
-                catch (System.ComponentModel.Win32Exception) { } // not on PATH: try the next name
+                catch (System.Exception) { continue; } // not on PATH: try the next name
+                if (p == null) continue;
+                using (p)
+                {
+                    var err = p.StandardError.ReadToEndAsync();
+                    if (!p.WaitForExit(EncodeTimeoutMs)) { try { p.Kill(); } catch (System.Exception) { } return "the encoder took over 2 minutes on one stem"; }
+                    if (p.ExitCode == 0) return null;
+                    string msg = err.Wait(1000) ? err.Result.Trim() : "";
+                    // 2 is web_music.py's "no ffmpeg and no soundfile"; 9009 is Windows' python alias with no Python installed
+                    if (p.ExitCode == 9009) { last = "no python installed"; continue; }
+                    if (p.ExitCode == 2 && msg.StartsWith("no encoder")) return "no ffmpeg on PATH and no soundfile package";
+                    int nl = msg.LastIndexOf('\n');
+                    return $"{script} exited {p.ExitCode}: {(nl >= 0 ? msg.Substring(nl + 1) : msg)}";
+                }
             }
-            return 2;
+            return last;
         }
     }
 }

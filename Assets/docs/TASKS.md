@@ -102,7 +102,9 @@ Owner: __OWNER__ · Executor: AI Assistant · Updated: __DATE__ (made from the s
 - [ ] **2.1 Builds from the menu.** `Build > WebGL / Android / iOS`; the web download logged against the budget;
   `Builds/Checks/size_*.md` written. *Try:* `Serve Web Build on the LAN`, open it on a phone.
 - [ ] **2.2 Web budget.** Under ~10 MB download: `WebSize` caps, crunch for flat art, Brotli, wasm for size; music
-  streamed (`MusicBundles`), never in the first download.
+  streamed (`MusicBundles`), never in the first download. Smaller web music needs an MP3 encoder (ffmpeg on PATH or
+  `pip install soundfile`, see `tools/web_music.py`); without one the build still works and packs bigger clips, with a
+  warning in the log: install one here if the size report says the music is what is over budget.
 - [ ] **2.3 Phone fit.** 60 fps, safe area, keep-awake, pause in the background (`PhoneFit`); haptics on the moments
   (`Haptics`), off with the setting. *Try (__OWNER__):* ten inputs on the phone without one going wrong.
 - [ ] **2.4 Phone test (__OWNER__).** The FPS (`DevFps` in a dev build), swipes that went the wrong way, whether
@@ -131,7 +133,8 @@ Owner: __OWNER__ · Executor: AI Assistant · Updated: __DATE__ (made from the s
   builder step; a level never references a model. The primitives stay underneath (views, rules and checks hang on them).
 - [ ] **4.3 Sound effects (__OWNER__ approves by ear).** Ids in `Sfx.Id`, picks in `SoundPicks` (two to four variants
   each, from the library outside the project), `Import Sound Picks`, the report. Strike the variants that grate.
-- [ ] **4.4 Music.** Two stems per track (calm, full) crossfaded by intensity, ducked in menus, streamed from bundles;
+- [ ] **4.4 Music.** Two stems per track (calm, full) crossfaded by intensity, ducked in menus, streamed from bundles
+  (on the web as small MP3s if an encoder is installed: 2.2);
   one track per chapter. __OWNER__ shortlists by ear.
 - [ ] **4.5 UI skin.** A `UISkin` asset built from the UI pack by an editor script (a few sprites and one font, never
   the pack copied in); flat boxes until then.

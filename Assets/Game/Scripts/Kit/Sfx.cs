@@ -13,7 +13,9 @@ namespace GameScaffold
     /// <para>Music: a track is stems of the same length (calm to full), played in lockstep and mixed by
     /// <see cref="MusicIntensity"/>; two voices per stem alternate so a track with a reverb tail loops seamlessly.
     /// Tracks are packed per platform into AssetBundles (<c>Editor/MusicBundles.cs</c>) and loaded when first
-    /// wanted, so they are not in the first web download and never sit on a server as loose audio files.</para>
+    /// wanted, so they are not in the first web download and never sit on a server as loose audio files. On the web a
+    /// bundle holds small MP3s as data instead (<c>MusicBundles</c>), decoded here by the browser
+    /// (<c>Plugins/WebGL/WebMusic.jslib</c>) and timed by the source's exact length.</para>
     /// The SOUND setting (<see cref="Progress.Sound"/>) is the master switch through <see cref="AudioListener.volume"/>;
     /// MUSIC (<see cref="Progress.Music"/>) mutes the stems; <see cref="Ducked"/> drops the music under a menu.
     /// </summary>
@@ -91,9 +93,8 @@ namespace GameScaffold
             s.musicEntry = e;
             s.stems = Mathf.Min(MaxStems, e.clips.Length);
             double start = AudioSettings.dspTime + 0.1;
-            float len = e.clips[0].length;
             s.musicCur = 0;
-            s.nextLoopDsp = start + Mathf.Max(1f, len - e.tail);
+            s.nextLoopDsp = start + e.Period;
             for (int k = 0; k < s.stems; k++)
             {
                 s.music[k * 2].clip = e.clips[k];
@@ -116,10 +117,52 @@ namespace GameScaffold
         // the Editor that would write them into Resources/SoundBank.asset and back into the build's data)
         private readonly Dictionary<string, SoundBank.Entry> streamedReady = new Dictionary<string, SoundBank.Entry>();
 
+#if UNITY_WEBGL && !UNITY_EDITOR
+        [System.Runtime.InteropServices.DllImport("__Internal")] private static extern string GSMusicBlobUrl(byte[] data, int length);
+        [System.Runtime.InteropServices.DllImport("__Internal")] private static extern void GSRevokeMusicBlobUrl(string url);
+#endif
+
+        /// <summary>The web bundle's MP3 stems (TextAssets, sorted by name) decoded into clips; the loop length from its
+        /// <c>length</c> file. Empty when the bundle holds clips instead (no encoder at build time).</summary>
+        private System.Collections.IEnumerator DecodeWebStems(AssetBundle b, List<AudioClip> into, float[] loopSeconds)
+        {
+#if UNITY_WEBGL && !UNITY_EDITOR
+            AssetBundleRequest all = b.LoadAllAssetsAsync<TextAsset>();
+            yield return all;
+            var stems = new List<TextAsset>();
+            foreach (Object o in all.allAssets)
+            {
+                if (!(o is TextAsset t)) continue;
+                if (t.name == "length") float.TryParse(t.text, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out loopSeconds[0]);
+                else stems.Add(t);
+            }
+            stems.Sort((x, y) => string.CompareOrdinal(x.name, y.name));
+            foreach (TextAsset t in stems)
+            {
+                byte[] data = t.bytes;
+                string url = GSMusicBlobUrl(data, data.Length);
+                using (var req = UnityEngine.Networking.UnityWebRequestMultimedia.GetAudioClip(url, AudioType.MPEG))
+                {
+                    yield return req.SendWebRequest();
+                    if (req.result == UnityEngine.Networking.UnityWebRequest.Result.Success)
+                    {
+                        AudioClip c = UnityEngine.Networking.DownloadHandlerAudioClip.GetContent(req);
+                        if (c != null) { c.name = t.name; into.Add(c); }
+                    }
+                    else Debug.LogWarning($"[Sfx] stem {t.name} did not decode ({req.error})");
+                }
+                GSRevokeMusicBlobUrl(url);
+            }
+#else
+            yield break;
+#endif
+        }
+
         private System.Collections.IEnumerator LoadStreamed(SoundBank.Entry e, float fadeIn)
         {
             loading.Add(e.id);
             AudioClip[] clips = null;
+            var loop = new float[1];
 #if UNITY_EDITOR
             // in the Editor the stems play straight from the project: no bundles to build first
             var found = new List<AudioClip>();
@@ -147,6 +190,7 @@ namespace GameScaffold
                         yield return all;
                         var list = new List<AudioClip>();
                         foreach (Object o in all.allAssets) if (o is AudioClip c) list.Add(c);
+                        if (list.Count == 0) yield return DecodeWebStems(b, list, loop); // the web build's MP3 stems
                         clips = list.ToArray();
                         // the bundle stays loaded: its clips stream from it
                     }
@@ -157,7 +201,7 @@ namespace GameScaffold
             loading.Remove(e.id);
             if (clips == null || clips.Length == 0) yield break;
             System.Array.Sort(clips, (a, c) => string.CompareOrdinal(a.name, c.name)); // MusicN_0 (calm), MusicN_1 (full)
-            streamedReady[e.id] = new SoundBank.Entry { id = e.id, clips = clips, volume = e.volume, tail = e.tail, pitchJitter = 0f, streamed = true };
+            streamedReady[e.id] = new SoundBank.Entry { id = e.id, clips = clips, volume = e.volume, tail = e.tail, pitchJitter = 0f, streamed = true, loopSeconds = loop[0] };
             if (wantedMusic == e.id) PlayMusic(e.id, fadeIn);
         }
 
@@ -197,7 +241,7 @@ namespace GameScaffold
                 return;
             }
             double now = AudioSettings.dspTime;
-            double period = Mathf.Max(1f, musicEntry.clips[0].length - musicEntry.tail);
+            double period = musicEntry.Period;
             if (otherScheduled && now >= nextLoopDsp)
             {
                 musicCur = 1 - musicCur;

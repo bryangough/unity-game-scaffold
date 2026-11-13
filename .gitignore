@@ -51,6 +51,9 @@ crashlytics-build.properties
 # The music bundles, built per platform before every player build (Editor/MusicBundles.cs)
 /[Aa]ssets/StreamingAssets/Music/
 /[Aa]ssets/StreamingAssets/Music.meta
+# and the web build's MP3 stems, encoded from the music before a web build
+/[Aa]ssets/Game/Audio/WebMusic/
+/[Aa]ssets/Game/Audio/WebMusic.meta
 
 # TextMesh Pro's essential resources are Unity's: imported by Setup, never committed
 /[Aa]ssets/TextMesh Pro/

@@ -91,6 +91,10 @@ they could be.
   loaded when a chapter opens, and never a loose audio file on a server (licences). In the Editor the stems play
   straight from the project. Never give the bank asset the loaded clips: in the Editor that writes them back into
   the asset and into the build.
+- **Unity re-encodes every web sound to ~128 kbps AAC**, whatever the import settings say. The web build's music is
+  therefore encoded outside Unity (`tools/web_music.py`: 40 kbps mono MP3), packed as data in the same bundles and
+  decoded by the browser; the jelly game's download went 24.8 → 12.0 MB. Time the loop by the source's length, not
+  the decoded clip's: MP3 encoders pad the ends.
 - **Sound libraries stay outside the project.** A picks list, an import menu, mobile import rules (mono, 22 kHz,
   ADPCM for short one-shots, Vorbis for loops, Streaming for music), and a WAV downsampler so a 30 MB stem lands in
   git at 4.6 MB. A pack with no licence to read was removed before release.

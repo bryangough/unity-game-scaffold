@@ -24,6 +24,11 @@ namespace GameScaffold
             public float tail;
             [Tooltip("Music only: the stems are not in the build's data; they are packed in the AssetBundle StreamingAssets/Music/<id in lower case>, loaded when the track is first played.")]
             public bool streamed;
+            [Tooltip("Music only, set at load: the loop's length in seconds when the clips' own is not exact (the web build's decoded MP3s carry the encoder's padding). 0 = the first clip's length.")]
+            public float loopSeconds;
+
+            /// <summary>One pass of the track, before its tail: what the music loop is timed by.</summary>
+            public float Period => Mathf.Max(1f, (loopSeconds > 0f ? loopSeconds : clips[0].length) - tail);
         }
 
         public Entry[] entries;

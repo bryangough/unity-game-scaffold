@@ -13,20 +13,23 @@ use freely (MIT). Your own packs stay on a shelf outside the project and only th
 
 | Where | What |
 |---|---|
-| `Assets/Game/Scripts/Kit/` | **The kit.** `FunTestKit` (timer, WIN / LOSE banner, callout, RESTART + `R`, EventSystem, aspect fit), `GameFeel` (shake, hit-stop, bursts, confetti, popups, punch, flash; no assets), `GameInput` (every input as an Input System action; touch, keys and a pad), `TouchInputAdapter` (press / drag / release), `InputMode` (shows key prompts only to keyboard and pad players), `PhoneFit` + `AspectMatch` + `Orientation` (60 fps, safe area, pause in the background; iPads match height; tablets may rotate), `Progress` (the save: per-level stars and bests, settings, one-time flags; JSON in PlayerPrefs, versioned, tested), `MissionBook` (three missions at a time from a pool, tested), `AppFlow` (screens, overlay stack and what Back does, tested), `ScreenFade`, `Sfx` + `SoundBank` (one-shots by id, level-driven loops, ducking, stem music crossfaded by intensity, streamed from per-track AssetBundles), `Haptics` (Android, iOS, web), `GameServices` (the empty slot where ads and analytics would go), `DevMenu` (an IMGUI dev panel the game fills; unlocked on a release build by seven taps), `UISkin`, `UIText`, `Credits` + `TextLinkOpener`, `ButtonPress`, `Breathe`, `DevFps`, `ExternalLink`, `InputBot` (hands for an Editor bot). |
+| `Assets/Game/Scripts/Kit/` | **The kit.** `FunTestKit` (timer, WIN / LOSE banner, callout, RESTART + `R`, EventSystem, aspect fit), `GameFeel` (shake, hit-stop, bursts, confetti, popups, punch, flash; no assets), `GameInput` (every input as an Input System action; touch, keys and a pad), `TouchInputAdapter` (press / drag / release), `InputMode` (shows key prompts only to keyboard and pad players), `PhoneFit` + `AspectMatch` + `Orientation` (60 fps, safe area, pause in the background; iPads match height; tablets may rotate), `Progress` (the save: per-level stars and bests, settings, one-time flags; JSON in PlayerPrefs, versioned, tested), `MissionBook` (three missions at a time from a pool, tested), `Unlocks` (skins, backdrops, tracks behind a lifetime count, with a "new" dot; tested), `AppFlow` (screens, overlay stack and what Back does, tested), `ScreenFade`, `Sfx` + `SoundBank` (one-shots by id, level-driven loops, ducking, stem music crossfaded by intensity, streamed from per-track AssetBundles; on the web as small MP3s when an encoder is installed), `Haptics` (Android, iOS, web), `GameServices` (the empty slot where ads and analytics would go), `DevMenu` (an IMGUI dev panel the game fills; unlocked on a release build by seven taps), `UISkin`, `UIText`, `Credits` + `TextLinkOpener`, `ButtonPress`, `Breathe`, `DevFps`, `ExternalLink`, `InputBot` (hands for an Editor bot: keys, a virtual gamepad, the mouse, a finger). |
 | `Assets/Game/Scripts/Sample/` | A 150-line sample game that uses all of it: rules in plain C# with tests, levels as data, a manager that only presents. Delete it when yours is in. |
-| `Assets/Game/Editor/` | **The tools**, under one menu. `Build Main Scene` (the scene is generated, never hand-edited), `Setup Project`, `Build > WebGL / Android / iOS` with a size report and a web budget, `Build > Store >` an upload key, a signed Play bundle and an itch.io zip, `WebSize` (our art's caps, Brotli, wasm for size), `TextureCaps` + `MeshCaps` (third-party art the build reaches, capped per platform), `MusicBundles`, `AndroidNoInternet`, `Audio > Import Sound Picks` (picks copied in from a library outside the project, mobile import rules, a downsampler), `Art > Cut Out Generated Art` (AI images into sprites, portraits, the app icon), `Run EditMode Tests` (to a report file), `Checks >` captures at phone / tall phone / tablet shapes, a colour-blindness capture, a text-fit audit and a smoke run, `Dev > Game View` sizes, `Saved Data >`, `Services >`. |
-| `Assets/Game/Tests/` | EditMode tests for the save, missions, app flow, the sample's rules and the colours a player must tell apart; `EditModeSuite.Run()` runs them all from a command when the Test Runner window is out of reach. |
+| `Assets/Game/Editor/` | **The tools**, under one menu. `Build Main Scene` (the scene is generated, never hand-edited), `Setup Project`, `Build > WebGL / Android / iOS` with a size report and a web budget, `Build > Store >` an upload key, a signed Play bundle and an itch.io zip, `WebSize` (our art's caps, Brotli, wasm for size), `TextureCaps` + `MeshCaps` (third-party art the build reaches, capped per platform), `MusicBundles`, `AndroidNoInternet`, `Audio > Import Sound Picks` (picks copied in from a library outside the project, mobile import rules, a downsampler), `Art > Cut Out Generated Art` (AI images into sprites, portraits, the app icon), `Run EditMode Tests` (to a report file), `Checks >` captures at phone / tall phone / tablet shapes, a colour-blindness capture, a text-fit audit, a smoke run and a keys-and-pad check (every binding pressed through the real Input System), `Store > Capture Screenshots` (every store size, the save untouched), `Dev > Game View` sizes, `Saved Data >`, `Services >`. |
+| `Assets/Game/Tests/` | EditMode tests for the save, missions, unlocks, app flow, the sample's rules and the colours a player must tell apart (every pair, under four kinds of colour vision and greyscale); `EditModeSuite.Run()` runs them all from a command when the Test Runner window is out of reach. |
 | `Assets/docs/` | **The plan** (`TASKS.md`, as a template: ground rules, the bar, the road to a full game (M1 → M6), phases 0–7 with the briefs every game needed, decisions, open questions, the asset shelf), its archive, the playtest notes and scorecard, the art prompts and the name brainstorm templates, `initial/` for the fun-test record. |
+| `Assets/WebGLTemplates/Game/` | The web page: fills an itch.io frame or a phone browser at 9:16, no footer, keys work inside the frame. |
 | `CLAUDE.md` | What an AI assistant reads first: the layout, the stack, the conventions. `templates/CLAUDE.md` is the game version. |
 | `docs/` | [`method.md`](docs/method.md) (idea → two-minute playable → verdict → own project → milestones → store), [`tasks_guide.md`](docs/tasks_guide.md) (how the task list works and why), [`lessons.md`](docs/lessons.md) (the tricks and the traps, most of them learned with an assistant driving the Editor). |
-| `tools/` | `new_game.py` (a new project from the scaffold, renamed and ready), `graduate.py` (bring a prototype over from an idea test bed), `unity_batch.py` (compile, set up, test and build headless). |
-| `Store/` | Templates for the listing, the privacy policy and the licence list. |
+| `tools/` | `new_game.py` (a new project from the scaffold, renamed and ready), `graduate.py` (bring a prototype over from an idea test bed), `unity_batch.py` (compile, set up, test and build headless), `web_music.py` (the web build's small MP3 music; optional). |
+| `Store/` | Templates for the listing (with the store rules learned shipping two games: screenshot sizes, ratings, itch.io settings, a pre-submission checklist), the privacy policy and the licence list. |
 
 ## Quick start
 
 Requirements: Unity 6000.6 (the exact version is in `ProjectSettings/ProjectVersion.txt`; the Hub installs it), the
-Android / iOS / WebGL build modules for the builds you want, Python 3 for the tools, git.
+Android / iOS / WebGL build modules for the builds you want, Python 3 for the tools, git. Optional: ffmpeg (or
+`pip install soundfile`) for smaller web music; without it a web build still works, with bigger music files and a
+warning.
 
 ```
 git clone https://github.com/<you>/unity-game-scaffold.git
@@ -39,7 +42,9 @@ it in Unity Hub, run **My Game > Setup Project (once)** (it imports TextMesh Pro
 and the main scene), press Play: tap the lit tiles. Or headless: `python tools/unity_batch.py setup`, then `tests`.
 
 Then read the new project's `CLAUDE.md` and fill in `Assets/docs/TASKS.md`: what the game is, the bar it is judged
-against, the first phase. Replace `Scripts/Sample/` with your game; keep the kit.
+against, the first phase. Replace `Scripts/Sample/` with your game and keep the kit: point `Editor/SceneBuilder.cs`
+at your scene and `Tests/ColourBlindTests.cs` at your colours, delete `Tests/SampleRulesTests.cs`, and list your
+store shots in `Editor/StoreCaptures.cs`.
 
 ## Starting a game
 
@@ -70,7 +75,7 @@ The scaffold is half code and half method. The method, in one breath:
 6. **Assets live outside the project** until an art pick; then only the subset a builder uses, and never a whole
    sound library. Licences are written down before anything ships.
 7. **Measure, don't guess:** the build writes a size report; the web download has a budget; the sound report says
-   what the clips cost; a colour-blindness capture and a smoke run are one menu each.
+   what the clips cost; a colour-blindness capture, a smoke run and a keys-and-pad check are one menu each.
 
 The traps, with the fixes that worked, are in [`docs/lessons.md`](docs/lessons.md): the Unity MCP console hiding
 compile errors, Play mode not ticking in the background, the keyboard device switched off when the Game view loses

@@ -182,18 +182,30 @@ namespace GameScaffold.Editor
             string folder = Path.GetFullPath(Path.Combine(Root, "WebGL"));
             if (!File.Exists(Path.Combine(folder, "index.html"))) { Debug.LogError("[PhoneBuilds] No web build yet: Build > WebGL first."); return; }
             StopServer();
-            try
+            // python on Windows, python3 on a Mac; Windows' "python" shortcut with no Python behind it starts and exits at once
+            foreach (string exe in new[] { "python", "python3" })
             {
-                server = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                try
                 {
-                    FileName = "python",
-                    Arguments = $"-m http.server {WebPort} --bind 0.0.0.0",
-                    WorkingDirectory = folder,
-                    UseShellExecute = false,
-                    CreateNoWindow = true,
-                });
+                    server = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                    {
+                        FileName = exe,
+                        Arguments = $"-m http.server {WebPort} --bind 0.0.0.0",
+                        WorkingDirectory = folder,
+                        UseShellExecute = false,
+                        CreateNoWindow = true,
+                    });
+                }
+                catch (Exception) { server = null; continue; } // not on the PATH: try the next name
+                if (server != null && !server.WaitForExit(1000)) break; // still running after a second: it is serving
+                server = null;
             }
-            catch (Exception e) { Debug.LogError("[PhoneBuilds] Could not start Python's web server (is Python on the PATH?): " + e.Message); return; }
+            if (server == null)
+            {
+                Debug.LogError($"[PhoneBuilds] Could not start Python's web server: no working python or python3 on the PATH, or port {WebPort} is " +
+                               "already in use. Install Python 3, or serve Builds/WebGL with any static web server.");
+                return;
+            }
             string urls = string.Join("  or  ", LanAddresses().Select(a => $"http://{a}:{WebPort}"));
             Log(BuildTarget.WebGL, $"serving {folder} at {(urls.Length > 0 ? urls : $"http://localhost:{WebPort}")} (Build > Stop Web Server to stop)");
         }

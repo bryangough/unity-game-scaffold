@@ -150,6 +150,32 @@ they could be.
   subject per image, the same seed across a set. **Brainstorm the name in a file** (`names.md`) and check every
   finalist on the stores before the id is set.
 
+## From the releases (the jelly game and the stealth game)
+
+- **Cache slow checks by a hash of everything the answer depends on.** The stealth game's level check (a solver per
+  room, plus the same room with each mechanic taken out, to prove the room needs it) took minutes. Keyed by a SHA1 of
+  the level's data, the solver's budget and the **full source of the rules files**, one cache entry per level: change
+  a level and only it is solved again, change a rule and every one is. Titles and art stay out of the key. The misses
+  run in a `Parallel.ForEach` (plain C# with no shared state), capped at cores − 1 and at most 4, since one big search
+  holds a few hundred thousand boards.
+- **Offer the hint after three failures, and count a stuck restart as one.** The hint (a ghost walking the solution)
+  appears after three catches in a level; a restart after a few moves counts too, or a player stuck without failing
+  (a crate pushed into a corner) never sees it. Using it gives up the mastery star for that try, not the level.
+- **Set sound levels by ear, in the game.** Clips from different packs sat ~20 dB apart: a robot's step at 0.2 drowned
+  the player's own (0.07 was right). Repeated sounds from other characters fade with distance from the player. Music
+  goes in at one loudness (the full layer at −24 dB RMS), then the owner tunes it while playing.
+- **Fewer tracks.** Ten tracks, one per chapter, were 29 MB of bundles; four, unlocked by stars and one chosen for the
+  whole game, were 12 MB and read as a reward (`UnlockTable`).
+- **A build step that edits an asset must write it and check it.** A deferred save once committed an empty sound bank;
+  write with `AssetDatabase.SaveAssets` (or the file directly) and read it back before the build goes on.
+- **Store text the owner can paste.** Markdown quotes (`>`) don't copy into a store form: keep a plain-text
+  description per store (`Store/description_play.txt`), one line per paragraph, next to the draft.
+- **Check the font's embedding rights before it ships.** One game's font was marked restricted for embedding
+  (`fsType`) and had to be swapped; read the licence with the art pick, not at submission.
+- **The web page is part of the game.** Unity's default page put a footer under the canvas that pushed it 19 px out
+  of itch's 800-tall frame, and keys did nothing until the player clicked into the iframe: the scaffold's template
+  (`Assets/WebGLTemplates/Game`) fixes both. Leave itch's "start on page load" off: the click lets sound play at once.
+
 ## Working with the owner
 
 - **Answers are short; write them down verbatim with the date.** "Keep the old saw. no idea why it's there but it is

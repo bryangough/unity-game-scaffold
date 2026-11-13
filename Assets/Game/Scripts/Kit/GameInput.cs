@@ -26,6 +26,9 @@ namespace GameScaffold
         private static InputAction pause, back, submit, help, pagePrev, pageNext, devMenu;
         private static InputAction[] slots;
 
+        /// <summary>The whole map (for checks that walk every action and binding, <c>InputCheck</c>).</summary>
+        public static InputActionMap Map { get { Init(); return map; } }
+
         public static InputAction Point { get { Init(); return point; } }
         public static InputAction Press { get { Init(); return press; } }
         public static InputAction Up { get { Init(); return up; } }

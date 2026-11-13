@@ -5,7 +5,8 @@ namespace GameScaffold
 {
     /// <summary>
     /// A small fps / frame-ms / worst-frame readout at the bottom left, so a phone test gives numbers. Development
-    /// builds only, plus any build with the <c>DEV_FPS</c> define. Never in the Editor. Creates itself; nothing in the scene.
+    /// builds only, plus a web build opened with <c>?fps</c> in its address, plus any build with the <c>DEV_FPS</c>
+    /// define. Never in the Editor. Creates itself; nothing in the scene.
     /// </summary>
     public class DevFps : MonoBehaviour
     {
@@ -23,7 +24,12 @@ namespace GameScaffold
         {
             if (Application.isEditor) return;
 #if !DEV_FPS
-            if (!Debug.isDebugBuild) return;
+            // web builds are always release (PhoneBuilds), so there the readout is asked for in the page address:
+            // https://…/index.html?fps. Players never see it.
+            string url = Application.platform == RuntimePlatform.WebGLPlayer ? Application.absoluteURL ?? "" : "";
+            int q = url.IndexOf('?');
+            bool askedFor = q >= 0 && url.IndexOf("fps", q, System.StringComparison.OrdinalIgnoreCase) >= 0;
+            if (!Debug.isDebugBuild && !askedFor) return;
 #endif
             var go = new GameObject("DevFps");
             DontDestroyOnLoad(go);

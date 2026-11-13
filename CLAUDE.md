@@ -13,8 +13,9 @@ three games built the same way. `README.md` is the front page; `docs/method.md`,
 - Names are placeholders that `tools/new_game.py` rewrites: namespace `GameScaffold`, menu root `Menus.Root`
   (`Game/`), `GameInfo.Id / Title / Credit`, Player Settings product and company, `__GAME__`-style tokens in the
   docs and Store templates. Never hard-code a game's name anywhere else.
-- Verify before hand-off: `python tools/unity_batch.py compile`, `tests`, `levels`, and `setup` into a fresh copy made by
-  `new_game.py` (the smoke test of the whole thing). The project must not be open in another Editor while the batch
+- Verify before hand-off: `python tools/unity_batch.py compile`, `tests`, `levels`, then `python tools/smoke.py`
+  (fresh games made by `new_game.py`, with and without the sample, portrait and landscape, each set up, tested and
+  level-checked headless: the smoke test of the whole thing). The project must not be open in another Editor while the batch
   runs (`Temp/UnityLockfile`).
 
 ## Layout
@@ -23,16 +24,16 @@ three games built the same way. `README.md` is the front page; `docs/method.md`,
 |------|------|
 | `Assets/Game/Scripts/Kit/` | `Game.asmdef`, namespace `GameScaffold`. The kit: `FunTestKit`, `GameFeel`, `GameInput`, `TouchInputAdapter`, `InputMode`, `PhoneFit`, `AspectMatch`, `Orientation`, `Progress`, `MissionBook`, `Unlocks`, `AppFlow`, `Shell` + `ShellUI` + `LevelCatalog` (the screens around the game: start, level select, result card, pause, settings), `ScreenFade`, `Sfx` + `SoundBank`, `Haptics`, `GameServices`, `DevMenu`, `UISkin`, `UIText`, `Credits`, `TextLinkOpener`, `ButtonPress`, `Breathe`, `DevFps`, `ExternalLink`, `InputBot`, `ReplayBot` (the replay's driver in Play mode), `GameInfo`. |
 | `Assets/Game/Scripts/Sample/` | `SampleLevel(s)` (levels as data), `SampleRules` (plain C#), `SampleGame` (the manager that presents them, inside the `Shell`'s screens). |
-| `Assets/Game/Editor/` | `Game.Editor.asmdef`. `Menus` (the menu root), `ProjectSetup`, `SceneBuilder` (**source of truth for the scene**), `FunTestKitBuilder`, `PhoneBuilds`, `WebSize`, `TextureCaps` + `MeshCaps`, `MusicBundles`, `StoreBuilds`, `AndroidNoInternet`, `SoundPicks`, `SfxImportRules`, `WavDownsample`, `ArtCutout`, `TestRunnerMenu`, `SavedDataMenu`, `ServicesMenu`, `Captures`, `StoreCaptures`, `ColourCheck`, `TextAudit`, `LevelCheck` (the level check: a cache per level, the misses in parallel, the plans kept) + `LevelReplay` (every plan through the real game), `SampleChecks` (the sample's own, deleted with it), `SmokeRun`, `InputCheck`, `BatchCapture`, `GameViewSize`. |
+| `Assets/Game/Editor/` | `Game.Editor.asmdef`. `Menus` (the menu root), `ProjectSetup`, `SceneBuilder` (**source of truth for the scene**; the game's part is the one call to `SampleScene`), `FunTestKitBuilder`, `PhoneBuilds`, `WebSize`, `TextureCaps` + `MeshCaps`, `MusicBundles`, `StoreBuilds`, `AndroidNoInternet`, `SoundPicks`, `SfxImportRules`, `WavDownsample`, `ArtCutout`, `TestRunnerMenu`, `SavedDataMenu`, `ServicesMenu`, `Captures`, `StoreCaptures`, `ColourCheck`, `TextAudit`, `LevelCheck` (the level check: a cache per level, the misses in parallel, the plans kept) + `LevelReplay` (every plan through the real game), `SampleChecks` (the sample's own, deleted with it), `SmokeRun`, `InputCheck`, `BatchCapture`, `GameViewSize`. |
 | `Assets/Game/Tests/` | `Game.Tests.asmdef` (EditMode, NUnit): `ProgressTests`, `MissionBookTests`, `UnlocksTests`, `AppFlowTests`, `ShellTests`, `LevelCheckTests`, `SampleRulesTests`, `ColourBlindTests`, `DocsTests` (both `CLAUDE.md` files name every script in `Kit/` and `Editor/`); `EditModeSuite.Run()` for a RunCommand. |
 | `Assets/docs/` | `TASKS.md`, `TASKS_archive.md`, `PLAYTEST_NOTES.md`, `art_prompts.md`, `names.md`, `initial/fun_test_record.md` (templates). |
 | `Assets/Plugins/` | `iOS/Haptics.mm`, `WebGL/Haptics.jslib`, `WebGL/ExternalLink.jslib`, `WebGL/WebMusic.jslib`. |
 | `Assets/WebGLTemplates/Game/` | The web page: fills its frame, no footer, focus for keys in an iframe. |
 | `Assets/Settings/` | URP assets (`Mobile_RPAsset`, `PC_RPAsset`, renderers, the global settings). |
 | `Assets/docs/` | `TASKS.md` (the plan template), `TASKS_archive.md`, `initial/fun_test_record.md`. |
-| `templates/` | `CLAUDE.md` for a game made from the scaffold. |
+| `templates/` | `CLAUDE.md` for a game made from the scaffold; `game/` is the stub `new_game.py --no-sample` puts where the sample was (`GameRules`, `GameLevels`, `GameManager`, `GameScene`, `GameChecks`, `GameRulesTests`). It is not compiled here: `tools/smoke.py` compiles and tests it. |
 | `docs/` | `method.md`, `tasks_guide.md`, `lessons.md`. They are copied into every new game, so write them for a game's assistant as well as for this repo. |
-| `tools/` | `new_game.py`, `graduate.py`, `unity_batch.py`, `web_music.py` (the web build's MP3 stems). |
+| `tools/` | `new_game.py` (`--landscape`, `--no-sample`; its rewrite rules are the single list `text_pairs`), `sync_kit.py` (kit fixes between a game and the scaffold, from the game's `.scaffold.json`), `smoke.py`, `graduate.py`, `unity_batch.py`, `web_music.py` (the web build's MP3 stems). |
 | `Store/` | `listing.md`, `privacy.md`, `licences.md` templates. |
 
 ## Stack and conventions
@@ -43,7 +44,9 @@ three games built the same way. `README.md` is the front page; `docs/method.md`,
 - **Input System only.** Never `UnityEngine.Input`; every input is an action on `GameInput`; the pointer goes
   through `TouchInputAdapter`.
 - **Portrait, touch first**: canvas 720 × 1280 matched on width (`PrototypeUIHelper`), camera fit 9:16
-  (`FunTestKit.DesignAspect`), portrait-only Player Settings. A landscape game flips both.
+  (`FunTestKit.DesignAspect`), portrait-only Player Settings. `new_game.py --landscape` flips them; anything that
+  lays out a screen reads `PrototypeUIHelper.ReferenceResolution` (the `Shell` has a layout for each), never a
+  hard-coded 720 or 1280.
 - Rules in plain C# with EditMode tests; MonoBehaviours present them. Levels are data. Scenes are generated.
 - Menu items hang under `Menus.Root`; log tags are `[ClassName]`; reports go to `Builds/Checks/*.md` (git-ignored).
 - Commit per task: `type(phaseN): summary`.

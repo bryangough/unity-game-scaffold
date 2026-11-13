@@ -37,7 +37,7 @@ namespace GameScaffold
                 Screen.autorotateToLandscapeRight = true;
                 Screen.orientation = ScreenOrientation.AutoRotation;
             }
-            else Screen.orientation = ScreenOrientation.Portrait;
+            else Screen.orientation = Shell.Wide ? ScreenOrientation.LandscapeLeft : ScreenOrientation.Portrait; // a phone keeps the game's own shape
         }
     }
 }

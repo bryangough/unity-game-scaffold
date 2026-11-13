@@ -7,7 +7,7 @@ using UnityEngine;
 namespace GameScaffold.Editor
 {
     /// <summary>
-    /// Portrait captures of the live game with its overlay canvases (the HUD and the menus) for the checks in
+    /// Captures of the live game (portrait, or landscape when the canvas's reference shape is: <see cref="Oriented"/>) with its overlay canvases (the HUD and the menus) for the checks in
     /// <c>Builds/Checks/views/</c>, so an assistant (or a commit) can look at what the player sees. Overlay canvases are
     /// drawn by the screen, not a camera, so each is switched to the main camera for one render and back. Edit or Play
     /// mode; the <c>Checks > Capture …</c> items shoot the phone, tall-phone and tablet shapes. <see cref="Sequence"/>
@@ -18,11 +18,17 @@ namespace GameScaffold.Editor
     {
         public const string ViewsDir = "Builds/Checks/views";
 
-        /// <summary>Writes <c>&lt;dir&gt;/&lt;name&gt;.png</c> (<see cref="ViewsDir"/> by default); false when there is no main camera.</summary>
-        public static bool Shot(string name, int w = 720, int h = 1280, string dir = ViewsDir)
+        /// <summary>A portrait size turned on its side for a landscape game (the reference canvas is wider than tall).</summary>
+        public static (int w, int h) Oriented(int w, int h) =>
+            PrototypeUIHelper.ReferenceResolution.x > PrototypeUIHelper.ReferenceResolution.y ? (Mathf.Max(w, h), Mathf.Min(w, h)) : (w, h);
+
+        /// <summary>Writes <c>&lt;dir&gt;/&lt;name&gt;.png</c> (<see cref="ViewsDir"/> by default) at the reference
+        /// resolution unless a size is given; false when there is no main camera.</summary>
+        public static bool Shot(string name, int w = 0, int h = 0, string dir = ViewsDir)
         {
             Camera cam = Camera.main;
             if (cam == null) return false;
+            if (w <= 0 || h <= 0) { w = (int)PrototypeUIHelper.ReferenceResolution.x; h = (int)PrototypeUIHelper.ReferenceResolution.y; }
             var rt = new RenderTexture(w, h, 24);
             RenderTexture prev = cam.targetTexture;
             var overlays = new List<Canvas>();
@@ -63,9 +69,11 @@ namespace GameScaffold.Editor
         }
 
         // The layouts at the shapes that matter, Edit or Play mode: a phone, a tall phone, an iPad. Judge sizes on the tall one.
-        [MenuItem(Menus.Root + "Checks/Capture Phone 9:16", false, 70)] private static void Shot916() => Shot("phone_9x16", 720, 1280);
-        [MenuItem(Menus.Root + "Checks/Capture Tall Phone 9:20", false, 71)] private static void Shot920() => Shot("phone_9x20", 1080, 2400);
-        [MenuItem(Menus.Root + "Checks/Capture Tablet 3:4", false, 72)] private static void Shot34() => Shot("tablet_3x4", 1536, 2048);
+        [MenuItem(Menus.Root + "Checks/Capture Phone 9:16", false, 70)] private static void Shot916() => ShotOriented("phone_9x16", 720, 1280);
+        [MenuItem(Menus.Root + "Checks/Capture Tall Phone 9:20", false, 71)] private static void Shot920() => ShotOriented("phone_9x20", 1080, 2400);
+        [MenuItem(Menus.Root + "Checks/Capture Tablet 3:4", false, 72)] private static void Shot34() => ShotOriented("tablet_3x4", 1536, 2048);
+
+        private static void ShotOriented(string name, int w, int h) { (int ow, int oh) = Oriented(w, h); Shot(name, ow, oh); }
 
         private static readonly Queue<System.Action> steps = new Queue<System.Action>();
         private static int frames;

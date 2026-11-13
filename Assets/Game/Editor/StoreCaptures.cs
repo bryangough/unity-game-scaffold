@@ -14,7 +14,7 @@ namespace GameScaffold.Editor
     /// <para>The game fills in <see cref="Shots"/>: find each scene by name, not number (renumbering levels then never
     /// breaks a shot), pose it (a few moves of the level's solution, a meter almost full) and hide one-time hints.
     /// Google Play takes up to 8, the App Store up to 10; the first two or three are the ones people see. The sizes
-    /// are portrait: a landscape game swaps them. From the stealth game.</para>
+    /// are written portrait and turned for a landscape game. From the stealth game.</para>
     /// </summary>
     public static class StoreCaptures
     {
@@ -60,7 +60,11 @@ namespace GameScaffold.Editor
                 steps.Add(() => pose.setup?.Invoke());
                 steps.Add(() =>
                 {
-                    foreach (var s in Sizes) Captures.Shot(pose.name, s.w, s.h, $"{Root}/{s.store}_{s.w}x{s.h}");
+                    foreach (var s in Sizes)
+                    {
+                        (int w, int h) = Captures.Oriented(s.w, s.h); // a landscape game's shots are the same sizes on their side
+                        Captures.Shot(pose.name, w, h, $"{Root}/{s.store}_{w}x{h}");
+                    }
                 });
             }
             steps.Add(() =>

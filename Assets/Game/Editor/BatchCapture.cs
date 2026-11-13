@@ -7,7 +7,7 @@ namespace GameScaffold.Editor
 {
     /// <summary>
     /// A headless look at the game: <c>tools/unity_batch.py capture</c> opens the main scene, enters Play mode, writes
-    /// <c>Builds/Checks/views/batch.png</c> (720 x 1280, HUD included) and quits. The cheapest way for an assistant to
+    /// <c>Builds/Checks/views/batch.png</c> (the canvas's reference size, HUD included) and quits. The cheapest way for an assistant to
     /// see the opening frame after a change, without an Editor window. <b>Only the opening frame:</b> with no Game
     /// view the player loop barely ticks (frame 4 after 120 editor ticks), so Update-driven state never advances; a
     /// game that has to run for a while needs the real Editor (<see cref="SmokeRun"/>). The log carries the camera,

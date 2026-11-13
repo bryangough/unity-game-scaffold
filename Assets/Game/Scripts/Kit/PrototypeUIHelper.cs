@@ -54,7 +54,7 @@ namespace GameScaffold
 
             TMPro.TextMeshProUGUI text = UIText.Make(panelGo.transform, "Text_Hint", 24f, new Color(0.95f, 0.98f, 1f, 0.95f));
             text.enableAutoSizing = true;
-            text.fontSizeMin = 18f;
+            text.fontSizeMin = 23f;
             text.fontSizeMax = 24f;
             text.text = instructionText;
 

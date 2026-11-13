@@ -144,8 +144,8 @@ Owner: __OWNER__ · Executor: AI Assistant · Updated: __DATE__ (made from the s
   pair checked by `ColourCheck.ClosePairs` in a test (`ColourBlindTests`).
 - [ ] **4.7 Icon and title logo** (6.2 feeds the store); the start screen. Generated images go through `Art > Cut Out
   Generated Art`; the prompts live in `art_prompts.md`.
-- [ ] **4.8 Readability pass.** `Checks > Text Fit Audit` clean at the floors (body ≥ 24, captions ≥ 20, button labels
-  ≥ 28 on the 720 canvas; the duel game's phone test set them); judged on the 9:20 and 3:4 captures.
+- [ ] **4.8 Readability pass.** `Checks > Text Fit Audit` clean at the floors (body ≥ 28, captions ≥ 23, button labels
+  ≥ 30 on the 720 canvas; the duel game's phone test set them); judged on the 9:20 and 3:4 captures.
 
 ## Phase 5 — The game around the levels
 

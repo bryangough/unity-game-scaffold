@@ -5,28 +5,19 @@ using UnityEngine;
 namespace GameScaffold.Tests
 {
     /// <summary>
-    /// The colours a player must tell apart, checked under normal vision, deuteranopia, protanopia, tritanopia and
-    /// greyscale (see <see cref="ColourCheck"/>). Put every "this means X" colour in a static field and add it to the
-    /// palette below; every pair is compared, so a colour-blind player never has to be told.
+    /// The colour check itself (see <see cref="ColourCheck"/>): pairs are compared under normal vision, deuteranopia,
+    /// protanopia, tritanopia and greyscale. The game's own palette is tested beside its rules: put every "this means
+    /// X" colour in a static field and pass them all to <see cref="ColourCheck.ClosePairs"/>, so every pair is
+    /// compared and a colour-blind player never has to be told (the sample's is <c>SampleColourTests</c>).
     /// </summary>
     public class ColourBlindTests
     {
-        private static readonly string[] Names = { "dark", "lit", "cursor" };
-        private static readonly Color[] Palette = { SampleGame.TileDark, SampleGame.TileLit, SampleGame.TileCursor };
-
         [Test]
-        public void Palette_EveryPairReadsApart_InEveryVisionMode()
+        public void ClosePairs_PassesColoursThatDifferInLightness()
         {
-            var close = ColourCheck.ClosePairs(Names, Palette);
-            Assert.IsEmpty(close, "Too close:\n" + string.Join("\n", close));
-        }
-
-        [Test]
-        public void LitTile_IsClearlyBrighterThanADarkTile()
-        {
-            // brightness alone carries "lit", for total colour blindness and a dim screen in sunlight
-            float dL = ColourCheck.Lightness(SampleGame.TileLit) - ColourCheck.Lightness(SampleGame.TileDark);
-            Assert.Greater(dL, 30f, $"lit is only {dL:0.0} L* brighter than dark");
+            var close = ColourCheck.ClosePairs(new[] { "dark", "bright" },
+                new[] { new Color(0.38f, 0.42f, 0.52f), new Color(1f, 0.85f, 0.25f) });
+            Assert.IsEmpty(close, string.Join("\n", close));
         }
 
         [Test]

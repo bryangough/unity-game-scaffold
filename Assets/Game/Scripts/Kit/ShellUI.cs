@@ -10,7 +10,7 @@ namespace GameScaffold
     /// The pieces the <see cref="Shell"/>'s screens are made of, usable by a game's own screens too (a collection, a
     /// how-to card): a dim, a card, a label and a button with a shadow it sinks onto and a focus ring for key and pad
     /// players. Flat coloured boxes until a <see cref="UISkin"/> is passed; sizes are canvas pixels on the 720-wide
-    /// reference and keep the readability floors (body 28, captions 23, button labels 28 and up, buttons 88 tall).
+    /// reference and keep the readability floors (body 28, captions 23, button labels 30 and up, buttons 88 tall).
     /// </summary>
     public static class ShellUI
     {
@@ -23,7 +23,7 @@ namespace GameScaffold
         public static readonly Color Soft = new Color(0.75f, 0.8f, 0.9f);
         public static readonly Color FocusColor = new Color(1f, 0.85f, 0.3f);
 
-        public const float BodySize = 28f, CaptionSize = 23f, ButtonLabelSize = 34f, ButtonLabelMin = 28f;
+        public const float BodySize = 28f, CaptionSize = 23f, ButtonLabelSize = 34f, ButtonLabelMin = 30f;
         private const float Drop = 5f;
         public static readonly Vector2 Centre = new Vector2(0.5f, 0.5f);
 

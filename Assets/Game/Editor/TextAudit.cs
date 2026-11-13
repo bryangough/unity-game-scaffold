@@ -10,13 +10,15 @@ namespace GameScaffold.Editor
 {
     /// <summary>
     /// <c>Game > Checks > Text Fit Audit</c>: every TextMesh Pro label in the open scene (and in prefabs under
-    /// <c>Assets/Game</c>) checked against the readability floors a phone test set, scaled to the 720-wide canvas:
-    /// body text ≥ 24 px, captions ≥ 20, button labels ≥ 28; and no label whose text overflows its box. Writes
+    /// <c>Assets/Game</c>) checked against the readability floors a phone test set (42 / 34 / 44 px on a 1080-wide
+    /// canvas), scaled to the 720-wide one: body text ≥ 28 px, captions ≥ 23, button labels ≥ 30; and no label whose
+    /// text overflows its box. A label smaller than the body floor is judged as a caption. Run it in Play mode to
+    /// include the screens built at run time (the kit's, the <see cref="Shell"/>'s). Writes
     /// <c>Builds/Checks/text.md</c>. From the duel game's iPhone test ("too small to read at arm's length").
     /// </summary>
     public static class TextAudit
     {
-        public const float BodyMin = 24f, CaptionMin = 20f, ButtonMin = 28f;
+        public const float BodyMin = 28f, CaptionMin = 23f, ButtonMin = 30f;
         public const string ReportPath = "Builds/Checks/text.md";
 
         [MenuItem(Menus.Root + "Checks/Text Fit Audit", false, 62)]

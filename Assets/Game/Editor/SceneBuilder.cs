@@ -10,9 +10,11 @@ namespace GameScaffold.Editor
 {
     /// <summary>
     /// <b>The source of truth for the scene.</b> <c>Game > Build Main Scene</c> regenerates
-    /// <c>Assets/Game/Scenes/Main.unity</c> (light, camera, input adapter, the HUD canvas, the game manager, the
-    /// fun-test kit, the <see cref="Shell"/> with the screens around the game) and puts it in Build Settings. Nothing in the scene is hand-placed: change this file, rebuild,
-    /// commit both. Levels are data (<see cref="SampleLevels"/>), never scenes.
+    /// <c>Assets/Game/Scenes/Main.unity</c> (light, camera, input adapter, the HUD canvas, the game's own objects,
+    /// the fun-test kit, the <see cref="Shell"/> with the screens around the game) and puts it in Build Settings.
+    /// Nothing in the scene is hand-placed: change this file, rebuild, commit both. Levels are data, never scenes.
+    /// The game's part (its HUD and its manager) is one call, <see cref="SampleScene.Add"/>: the only line here that
+    /// knows which game this is.
     /// </summary>
     public static class SceneBuilder
     {
@@ -53,30 +55,13 @@ namespace GameScaffold.Editor
             // input
             new GameObject("TouchInputAdapter").AddComponent<TouchInputAdapter>();
 
-            // HUD (portrait, 720 x 1280 matched on width)
+            // the HUD canvas (the reference resolution and match come from PrototypeUIHelper)
             var canvasGo = new GameObject("UI_Canvas");
             Canvas canvas = canvasGo.AddComponent<Canvas>();
             PrototypeUIHelper.SetupCanvas(canvas, canvasGo);
-            TMP_FontAsset font = UIText.Font;
 
-            TextMeshProUGUI status = UIText.Make(canvasGo.transform, "Text_Status", 26f, Color.white, TextAlignmentOptions.TopLeft, font);
-            status.text = "Level 1\nHits 0 / 10   Misses 0 / 2";
-            UIText.Outline(status);
-            RectTransform sr = status.rectTransform;
-            sr.anchorMin = sr.anchorMax = new Vector2(0f, 1f);
-            sr.pivot = new Vector2(0f, 1f);
-            sr.anchoredPosition = new Vector2(18f, -18f);
-            sr.sizeDelta = new Vector2(480f, 80f);
-
-            PrototypeUIHelper.CreateBottomDescriptionPanel(canvasGo, "Tap the lit tile before it goes dark. Arrows move, Enter taps. Esc pauses, R restarts; keys 1-3 pick a level.");
-
-            // the game manager
-            var gmGo = new GameObject("SampleGame");
-            SampleGame gm = gmGo.AddComponent<SampleGame>();
-            var so = new SerializedObject(gm);
-            so.FindProperty("cam").objectReferenceValue = cam;
-            so.FindProperty("statusText").objectReferenceValue = status;
-            so.ApplyModifiedPropertiesWithoutUndo();
+            // the game: its HUD on the canvas and its manager
+            SampleScene.Add(cam, canvasGo);
 
             FunTestKitBuilder.AddKit();
             // the screens around the game: start, level select, result card, pause, settings. A UI skin, once the game

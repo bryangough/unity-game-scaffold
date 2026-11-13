@@ -1,5 +1,6 @@
 using GameScaffold.Editor;
 using NUnit.Framework;
+using UnityEngine;
 
 namespace GameScaffold.Tests
 {
@@ -123,6 +124,31 @@ namespace GameScaffold.Tests
                 Assert.IsNotNull(LevelCheck.Plan(SampleChecks.Check(), 0, cache), "a passed level has a plan for the replay");
             }
             finally { if (System.IO.Directory.Exists(cache)) System.IO.Directory.Delete(cache, true); }
+        }
+    }
+
+    /// <summary>
+    /// The sample's colours a player must tell apart: every pair, under every kind of colour vision. The shape of a
+    /// game's own palette test.
+    /// </summary>
+    public class SampleColourTests
+    {
+        private static readonly string[] Names = { "dark", "lit", "cursor" };
+        private static readonly Color[] Palette = { SampleGame.TileDark, SampleGame.TileLit, SampleGame.TileCursor };
+
+        [Test]
+        public void Palette_EveryPairReadsApart_InEveryVisionMode()
+        {
+            var close = ColourCheck.ClosePairs(Names, Palette);
+            Assert.IsEmpty(close, "Too close:\n" + string.Join("\n", close));
+        }
+
+        [Test]
+        public void LitTile_IsClearlyBrighterThanADarkTile()
+        {
+            // brightness alone carries "lit", for total colour blindness and a dim screen in sunlight
+            float dL = ColourCheck.Lightness(SampleGame.TileLit) - ColourCheck.Lightness(SampleGame.TileDark);
+            Assert.Greater(dL, 30f, $"lit is only {dL:0.0} L* brighter than dark");
         }
     }
 }

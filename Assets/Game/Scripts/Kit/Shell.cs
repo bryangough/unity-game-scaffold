@@ -13,6 +13,8 @@ namespace GameScaffold
     /// vibration, reset) and what Back does on each (<see cref="AppFlow"/>; Esc, Android Back, the pad's B and Start).
     /// It builds its own canvas, so the scene builder drops one GameObject with this component. Flat boxes until a
     /// <see cref="UISkin"/> is wired in; keys and a pad work on every screen and a focus ring shows only to them.
+    /// The screens are laid out for the canvas's reference shape (<see cref="PrototypeUIHelper.ReferenceResolution"/>):
+    /// a column for portrait, and a wider arrangement of the same pieces for a landscape game (<see cref="Wide"/>).
     /// <para>What the game does: hand over its levels (<see cref="Catalog"/>, in its manager's Awake), build the level
     /// in <see cref="CurrentLevel"/> on load, tick only while <see cref="Playing"/>, and end a level with
     /// <see cref="ShowResult"/>. Levels open through <see cref="OpenLevel"/>: the level goes into the save and the
@@ -29,8 +31,14 @@ namespace GameScaffold
         // overlays
         public const string Pause = "Pause", Settings = "Settings", Confirm = "Confirm";
 
-        public const int Columns = 4, Rows = 5, PerPage = Columns * Rows;
-        private const float Tile = 144f, Gap = 16f;
+        /// <summary>A landscape game: the reference canvas is wider than it is tall.</summary>
+        public static bool Wide => PrototypeUIHelper.ReferenceResolution.x > PrototypeUIHelper.ReferenceResolution.y;
+        /// <summary>The level select's grid: 4 x 5 in portrait, 7 x 3 in landscape.</summary>
+        public static int Columns => Wide ? 7 : 4;
+        public static int Rows => Wide ? 3 : 5;
+        public static int PerPage => Columns * Rows;
+        private static float Tile => Wide ? 132f : 144f;
+        private static float Gap => Wide ? 14f : 16f;
 
         public static Shell Instance { get; private set; }
         /// <summary>Which screen is on and which overlays are over it. Lives across scene reloads.</summary>
@@ -128,7 +136,7 @@ namespace GameScaffold
 
         private GameObject hud, titleScreen, levelsScreen, resultScreen, pausePanel, settingsPanel, confirmPanel;
         private CanvasGroup titleGroup, levelsGroup, resultGroup;
-        private Button playButton, levelsButton, resumeButton, backButton, pagePrev, pageNext;
+        private Button playButton, levelsButton, settingsButton, resumeButton, backButton, pagePrev, pageNext;
         private Button resultPrimary, resultRetry, resultLevels, musicButton, soundButton, hapticsButton, confirmNo;
         private TextMeshProUGUI titleStars, pageLabel, resultCaption, resultTitle, resultLine, pauseCaption, confirmText;
         private readonly Button[] tiles = new Button[PerPage];
@@ -233,9 +241,10 @@ namespace GameScaffold
         {
             titleScreen = MakeScreen(root, "Screen_Title", out titleGroup);
             Transform t = titleScreen.transform;
+            bool wide = Wide; // portrait: one column; landscape: LEVELS and SETTINGS side by side under PLAY
             if (skin != null && skin.titleLogo != null)
             {
-                RectTransform lr = ShellUI.Box(t, "Logo", ShellUI.Centre, new Vector2(0f, 330f), new Vector2(560f, 280f));
+                RectTransform lr = ShellUI.Box(t, "Logo", ShellUI.Centre, new Vector2(0f, wide ? 205f : 330f), wide ? new Vector2(560f, 170f) : new Vector2(560f, 280f));
                 var img = lr.gameObject.AddComponent<Image>();
                 img.sprite = skin.titleLogo;
                 img.preserveAspect = true;
@@ -244,17 +253,17 @@ namespace GameScaffold
             }
             else
             {
-                TextMeshProUGUI title = ShellUI.Label(t, "Text_Title", GameInfo.Title, 84f, TitleCol, ShellUI.Centre, new Vector2(0f, 330f), new Vector2(640f, 230f), skin);
+                TextMeshProUGUI title = ShellUI.Label(t, "Text_Title", GameInfo.Title, 84f, TitleCol, ShellUI.Centre, new Vector2(0f, wide ? 205f : 330f), wide ? new Vector2(1000f, 170f) : new Vector2(640f, 230f), skin);
                 title.fontStyle = FontStyles.Bold;
                 title.enableAutoSizing = true;
                 title.fontSizeMin = 44f;
                 title.fontSizeMax = 84f;
                 title.gameObject.AddComponent<Breathe>();
             }
-            titleStars = ShellUI.Label(t, "Text_Stars", "", 30f, SoftCol, ShellUI.Centre, new Vector2(0f, 168f), new Vector2(600f, 50f), skin);
-            playButton = Btn(t, "Button_Play", "PLAY", UISkin.Role.Primary, new Vector2(0f, 20f), new Vector2(420f, 120f), PlayNext, 48f);
-            levelsButton = Btn(t, "Button_Levels", "LEVELS", UISkin.Role.Plain, new Vector2(0f, -130f), new Vector2(420f, 96f), () => Go(Levels));
-            Btn(t, "Button_Settings", "SETTINGS", UISkin.Role.Plain, new Vector2(0f, -246f), new Vector2(420f, 96f), () => Open(Settings));
+            titleStars = ShellUI.Label(t, "Text_Stars", "", 30f, SoftCol, ShellUI.Centre, new Vector2(0f, wide ? 104f : 168f), new Vector2(600f, 50f), skin);
+            playButton = Btn(t, "Button_Play", "PLAY", UISkin.Role.Primary, wide ? new Vector2(0f, -4f) : new Vector2(0f, 20f), wide ? new Vector2(420f, 112f) : new Vector2(420f, 120f), PlayNext, 48f);
+            levelsButton = Btn(t, "Button_Levels", "LEVELS", UISkin.Role.Plain, wide ? new Vector2(-215f, -136f) : new Vector2(0f, -130f), wide ? new Vector2(400f, 92f) : new Vector2(420f, 96f), () => Go(Levels));
+            settingsButton = Btn(t, "Button_Settings", "SETTINGS", UISkin.Role.Plain, wide ? new Vector2(215f, -136f) : new Vector2(0f, -246f), wide ? new Vector2(400f, 92f) : new Vector2(420f, 96f), () => Open(Settings));
 
             // the credit and version line: seven quick taps unlock the dev menu on a release build
             RectTransform vr = ShellUI.Box(t, "Button_Version", new Vector2(0.5f, 0f), new Vector2(0f, 56f), new Vector2(640f, 64f));
@@ -271,11 +280,12 @@ namespace GameScaffold
         {
             levelsScreen = MakeScreen(root, "Screen_Levels", out levelsGroup);
             Transform t = levelsScreen.transform;
-            TextMeshProUGUI head = ShellUI.Label(t, "Text_Heading", "LEVELS", 56f, TitleCol, new Vector2(0.5f, 1f), new Vector2(0f, -110f), new Vector2(600f, 90f), skin);
+            bool wide = Wide; // landscape: a wider, shorter grid, and BACK between the page arrows
+            TextMeshProUGUI head = ShellUI.Label(t, "Text_Heading", "LEVELS", wide ? 48f : 56f, TitleCol, new Vector2(0.5f, 1f), new Vector2(0f, wide ? -62f : -110f), new Vector2(600f, wide ? 70f : 90f), skin);
             head.fontStyle = FontStyles.Bold;
 
             float gridW = Columns * Tile + (Columns - 1) * Gap, gridH = Rows * Tile + (Rows - 1) * Gap;
-            RectTransform grid = ShellUI.Box(t, "Grid", ShellUI.Centre, new Vector2(0f, 42f), new Vector2(gridW, gridH));
+            RectTransform grid = ShellUI.Box(t, "Grid", ShellUI.Centre, new Vector2(0f, wide ? 14f : 42f), new Vector2(gridW, gridH));
             for (int i = 0; i < PerPage; i++)
             {
                 int slot = i;
@@ -286,16 +296,16 @@ namespace GameScaffold
                 if (skin != null && skin.levelTile != null) { face.sprite = skin.levelTile; face.type = Image.Type.Sliced; }
                 ShellUI.LabelOf(b).rectTransform.offsetMin = new Vector2(10f, 40f); // the number sits over the stars
                 if (skin != null) ShellUI.LabelOf(b).color = skin.levelText;
-                tileStars[i] = ShellUI.Label(face.transform, "Text_Stars", "", 24f, Color.white, new Vector2(0.5f, 0f), new Vector2(0f, 30f), new Vector2(Tile, 36f), skin);
+                tileStars[i] = ShellUI.Label(face.transform, "Text_Stars", "", 30f, Color.white, new Vector2(0.5f, 0f), new Vector2(0f, 30f), new Vector2(Tile, 36f), skin);
                 tiles[i] = b;
                 tileHome[i] = new Vector2(x, y);
             }
 
             Vector2 bottom = new Vector2(0.5f, 0f);
-            pagePrev = ShellUI.MakeButton(t, "Button_PagePrev", "<", UISkin.Role.Plain, bottom, new Vector2(-200f, 200f), new Vector2(96f, 88f), () => TurnPage(-1), skin, 40f);
-            pageNext = ShellUI.MakeButton(t, "Button_PageNext", ">", UISkin.Role.Plain, bottom, new Vector2(200f, 200f), new Vector2(96f, 88f), () => TurnPage(1), skin, 40f);
-            pageLabel = ShellUI.Label(t, "Text_Page", "", 30f, SoftCol, bottom, new Vector2(0f, 200f), new Vector2(260f, 60f), skin);
-            backButton = ShellUI.MakeButton(t, "Button_Back", "BACK", UISkin.Role.Plain, bottom, new Vector2(0f, 90f), new Vector2(420f, 96f), DoBack, skin);
+            pagePrev = ShellUI.MakeButton(t, "Button_PagePrev", "<", UISkin.Role.Plain, bottom, wide ? new Vector2(-420f, 62f) : new Vector2(-200f, 200f), new Vector2(96f, 88f), () => TurnPage(-1), skin, 40f);
+            pageNext = ShellUI.MakeButton(t, "Button_PageNext", ">", UISkin.Role.Plain, bottom, wide ? new Vector2(420f, 62f) : new Vector2(200f, 200f), new Vector2(96f, 88f), () => TurnPage(1), skin, 40f);
+            pageLabel = ShellUI.Label(t, "Text_Page", "", 30f, SoftCol, bottom, wide ? new Vector2(-290f, 62f) : new Vector2(0f, 200f), wide ? new Vector2(140f, 60f) : new Vector2(260f, 60f), skin);
+            backButton = ShellUI.MakeButton(t, "Button_Back", "BACK", UISkin.Role.Plain, bottom, wide ? new Vector2(0f, 62f) : new Vector2(0f, 90f), wide ? new Vector2(320f, 88f) : new Vector2(420f, 96f), DoBack, skin);
         }
 
         private void BuildResult(Transform root)
@@ -327,29 +337,34 @@ namespace GameScaffold
 
         private void BuildSettings(Transform root)
         {
-            settingsPanel = MakePanel(root, "Panel_Settings", new Vector2(560f, 780f), "SETTINGS", out Transform card);
-            Vector2 size = new Vector2(440f, 88f);
-            musicButton = Btn(card, "Button_Music", "", UISkin.Role.Plain, new Vector2(0f, 210f), size, () => { Progress.Current.Music = !Progress.Current.Music; FillSettings(); });
-            soundButton = Btn(card, "Button_Sound", "", UISkin.Role.Plain, new Vector2(0f, 110f), size, () => { Progress.Current.Sound = !Progress.Current.Sound; FillSettings(); });
-            hapticsButton = Btn(card, "Button_Vibration", "", UISkin.Role.Plain, new Vector2(0f, 10f), size, () =>
+            // portrait: one column; landscape: the three switches on the left, RESET, BACK and the credit on the right
+            bool wide = Wide;
+            settingsPanel = MakePanel(root, "Panel_Settings", wide ? new Vector2(920f, 520f) : new Vector2(560f, 780f), "SETTINGS", out Transform card);
+            Vector2 size = wide ? new Vector2(400f, 88f) : new Vector2(440f, 88f);
+            Vector2[] at = wide
+                ? new[] { new Vector2(-220f, 90f), new Vector2(-220f, -10f), new Vector2(-220f, -110f), new Vector2(220f, 90f), new Vector2(220f, -10f), new Vector2(220f, -112f) }
+                : new[] { new Vector2(0f, 210f), new Vector2(0f, 110f), new Vector2(0f, 10f), new Vector2(0f, -110f), new Vector2(0f, -220f), new Vector2(0f, -326f) };
+            musicButton = Btn(card, "Button_Music", "", UISkin.Role.Plain, at[0], size, () => { Progress.Current.Music = !Progress.Current.Music; FillSettings(); });
+            soundButton = Btn(card, "Button_Sound", "", UISkin.Role.Plain, at[1], size, () => { Progress.Current.Sound = !Progress.Current.Sound; FillSettings(); });
+            hapticsButton = Btn(card, "Button_Vibration", "", UISkin.Role.Plain, at[2], size, () =>
             {
                 Progress.Current.Haptics = !Progress.Current.Haptics;
                 Haptics.Play(Haptics.Strength.Light); // felt when it comes on, silent when it goes off
                 FillSettings();
             });
-            Btn(card, "Button_Reset", "RESET PROGRESS", UISkin.Role.Danger, new Vector2(0f, -110f), size, () =>
+            Btn(card, "Button_Reset", "RESET PROGRESS", UISkin.Role.Danger, at[3], size, () =>
                 Ask("Reset all progress?\nStars and bests are cleared; the settings stay.", () =>
                 {
                     Progress.ClearAll();
                     Flow.Enter(Title);
                     FunTestKit.Restart();
                 }));
-            Btn(card, "Button_Back", "BACK", UISkin.Role.Plain, new Vector2(0f, -220f), size, Resume);
+            Btn(card, "Button_Back", "BACK", UISkin.Role.Plain, at[4], size, Resume);
 
             string credit = GameInfo.Credit;
             if (!string.IsNullOrEmpty(GameInfo.Website))
                 credit += $"\n<link=\"https://{GameInfo.Website}\"><u><color=#{ColorUtility.ToHtmlStringRGB(TitleCol)}>{GameInfo.Website}</color></u></link>";
-            TextMeshProUGUI credits = ShellUI.Label(card, "Text_Credits", credit, ShellUI.CaptionSize, SoftCol, ShellUI.Centre, new Vector2(0f, -326f), new Vector2(480f, 72f), skin);
+            TextMeshProUGUI credits = ShellUI.Label(card, "Text_Credits", credit, ShellUI.CaptionSize, SoftCol, ShellUI.Centre, at[5], wide ? new Vector2(400f, 72f) : new Vector2(480f, 72f), skin);
             credits.raycastTarget = true; // the link is tapped
             credits.gameObject.AddComponent<TextLinkOpener>();
         }
@@ -394,6 +409,7 @@ namespace GameScaffold
             {
                 titleStars.text = Catalog != null ? $"<color=#{ColorUtility.ToHtmlStringRGB(StarCol)}>{UIText.StarOn}</color> {Progress.Current.TotalStars} / {LevelCount * 3}" : "";
                 levelsButton.gameObject.SetActive(LevelCount > 1);
+                if (Wide) ((RectTransform)settingsButton.transform).anchoredPosition = new Vector2(LevelCount > 1 ? 215f : 0f, -136f);
             }
             if (state == Levels) FillLevels();
             if (top == Pause) pauseCaption.text = Caption(CurrentLevel);
@@ -425,7 +441,7 @@ namespace GameScaffold
                 LevelRecord r = p.Level(level);
                 bool open = p.IsUnlocked(level);
                 ShellUI.SetLabel(tiles[i], (level + 1).ToString());
-                tileStars[i].text = r.solved ? UIText.Stars(Progress.Count(r.stars), 3, StarCol, 1f) : "";
+                tileStars[i].text = r.solved ? UIText.Stars(Progress.Count(r.stars), 3, StarCol, 0.8f) : "";
                 tiles[i].interactable = open;
                 ShellUI.Face(tiles[i]).color = TileColour(open, level == CurrentLevel, r.solved);
             }

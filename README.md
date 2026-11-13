@@ -21,7 +21,7 @@ use freely (MIT). Your own packs stay on a shelf outside the project and only th
 | `Assets/WebGLTemplates/Game/` | The web page: fills an itch.io frame or a phone browser at 9:16, no footer, keys work inside the frame. |
 | `CLAUDE.md` | What an AI assistant reads first: the layout, the stack, the conventions. `templates/CLAUDE.md` is the game version. |
 | `docs/` | [`method.md`](docs/method.md) (idea → two-minute playable → verdict → own project → milestones → store), [`tasks_guide.md`](docs/tasks_guide.md) (how the task list works and why), [`lessons.md`](docs/lessons.md) (the tricks and the traps, most of them learned with an assistant driving the Editor). |
-| `tools/` | `new_game.py` (a new project from the scaffold, renamed and ready), `graduate.py` (bring a prototype over from an idea test bed), `unity_batch.py` (compile, set up, test and build headless), `web_music.py` (the web build's small MP3 music; optional). |
+| `tools/` | `new_game.py` (a new project from the scaffold, renamed and ready; landscape or portrait, with the sample or a stub), `sync_kit.py` (a kit fix made in one game reaches the scaffold and the other games: it reports which side changed each file, pulls the scaffold's newer ones, pushes a game's fix back), `smoke.py` (fresh games made and run headless: the scaffold's own check), `graduate.py` (bring a prototype over from an idea test bed), `unity_batch.py` (compile, set up, test and build headless), `web_music.py` (the web build's small MP3 music; optional). |
 | `Store/` | Templates for the listing (with the store rules learned shipping two games: screenshot sizes, ratings, itch.io settings, a pre-submission checklist), the privacy policy and the licence list. |
 
 ## Quick start
@@ -37,14 +37,17 @@ cd unity-game-scaffold
 python tools/new_game.py "My Game" --company "My Studio" --bundle com.mystudio.mygame
 ```
 
-That makes `../MyGame`, renamed throughout (namespace, menu, save keys, Player Settings), with a first commit. Open
+That makes `../MyGame`, renamed throughout (namespace, menu, save keys, Player Settings), with a first commit.
+Add `--landscape` for a landscape game (the canvas, the camera fit, the web page, the Player Settings and the
+shell's screens all turn) and `--no-sample` to start from a small stub of your own files instead of the sample. Open
 it in Unity Hub, run **My Game > Setup Project (once)** (it imports TextMesh Pro's essentials, builds the sound bank
 and the main scene), press Play: PLAY, then tap the lit tiles. Or headless: `python tools/unity_batch.py setup`, then `tests` and `levels`.
 
 Then read the new project's `CLAUDE.md` and fill in `Assets/docs/TASKS.md`: what the game is, the bar it is judged
-against, the first phase. Replace `Scripts/Sample/` with your game and keep the kit: point `Editor/SceneBuilder.cs`
-at your scene and `Tests/ColourBlindTests.cs` at your colours, replace `Editor/SampleChecks.cs` with your own
-level check and replay, delete `Tests/SampleRulesTests.cs`, and list your store shots in `Editor/StoreCaptures.cs`.
+against, the first phase. Replace `Scripts/Sample/` with your game and keep the kit: `Editor/SampleScene.cs`
+(the game's part of the scene), `Editor/SampleChecks.cs` (its level check and replay) and
+`Tests/SampleRulesTests.cs` (its rule and colour tests) are the three files to replace with your own, and
+`--no-sample` does exactly that for you. Then list your store shots in `Editor/StoreCaptures.cs`.
 
 ## Starting a game
 

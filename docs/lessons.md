@@ -59,7 +59,7 @@ they could be.
   read as near-black. Keep albedos roughly in the 0.3–0.9 range and let the light do the darkening.
 - **Plans come from a compiled list, never from solving at Play start.** A replay that solved every level on the
   main thread when its cache was missing ran for minutes and crashed the Editor. Solve in a menu that writes the
-  plans into code (or a cache); the replay only reads.
+  plans into code (or a cache); the replay only reads (`LevelCheck.Plan` returns null rather than solve).
 
 ## The rules of the code that paid off
 
@@ -163,7 +163,7 @@ they could be.
   the level's data, the solver's budget and the **full source of the rules files**, one cache entry per level: change
   a level and only it is solved again, change a rule and every one is. Titles and art stay out of the key. The misses
   run in a `Parallel.ForEach` (plain C# with no shared state), capped at cores − 1 and at most 4, since one big search
-  holds a few hundred thousand boards.
+  holds a few hundred thousand boards. The scaffold's `LevelCheck` is this, with the game's solver plugged in.
 - **Offer the hint after three failures, and count a stuck restart as one.** The hint (a ghost walking the solution)
   appears after three catches in a level; a restart after a few moves counts too, or a player stuck without failing
   (a crate pushed into a corner) never sees it. Using it gives up the mastery star for that try, not the level.

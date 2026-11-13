@@ -78,9 +78,11 @@ Every game grew a set of one-click checks, each writing a Markdown report into `
 be read later (by the owner, by the next session, by a commit message):
 
 - **Validate levels**: every level winnable at its par, needs its rule, reads at a glance, starts safe. Cached per
-  level by a hash of the level and the rules' source, so only changed levels are re-solved.
+  level by a hash of the level and the rules' source, so only changed levels are re-solved. The scaffold's
+  `LevelCheck` is that harness; the game brings its solver.
 - **Replay**: every level's solution played through the real game, a key per beat, one tick a frame; a level the
   solver wins but the game does not means the views, the input or the frame loop disagree with the rules.
+  `LevelReplay` and `ReplayBot` drive it; the plans come from the level check's cache.
 - **Tests**: EditMode, through the Test Runner API to a report (the MCP cannot open the window).
 - **Size**: every build writes the packed assets by kind and the 25 heaviest; the web download is logged against a
   budget. Cuts are picked by size, not guessed.

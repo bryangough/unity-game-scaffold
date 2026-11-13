@@ -139,7 +139,7 @@ def main():
         f.write(f"# {a.name}\n\nA Unity game made from the game scaffold. Start with [`CLAUDE.md`](./CLAUDE.md) and "
                 f"[`Assets/docs/TASKS.md`](./Assets/docs/TASKS.md).\n\n"
                 f"- Open the folder in Unity Hub (Unity 6000.6), run **{a.name} > Setup Project (once)**, press Play.\n"
-                f"- Headless: `python tools/unity_batch.py setup`, `tests`, `build webgl`.\n"
+                f"- Headless: `python tools/unity_batch.py setup`, `tests`, `levels`, `build webgl`.\n"
                 f"- How the work is done: [`docs/method.md`](./docs/method.md), [`docs/tasks_guide.md`](./docs/tasks_guide.md), "
                 f"and the traps already paid for in [`docs/lessons.md`](./docs/lessons.md).\n"
                 f"- To bring a prototype in from the idea test bed: `python tools/graduate.py <proto folder> {folder}`.\n")
@@ -172,8 +172,9 @@ next:
   3. Bringing a prototype from the idea test bed? python tools/graduate.py <path to Proto_NN_Name> "{folder}"
   4. Read CLAUDE.md and docs/lessons.md, then fill in Assets/docs/TASKS.md: "Where the game is", the bar, phase 1.
   5. Once your own game manager is in, delete Assets/Game/Scripts/Sample/ and Tests/SampleRulesTests.cs; keep the Kit.
-     Two files point at the sample and are yours to rewire: Editor/SceneBuilder.cs (your scene) and
-     Tests/ColourBlindTests.cs (your colours). Then fill in StoreCaptures.Shots with your store poses.
+     Three files point at the sample and are yours to rewire: Editor/SceneBuilder.cs (your scene),
+     Tests/ColourBlindTests.cs (your colours) and Editor/SampleChecks.cs (your level check and replay).
+     Then fill in StoreCaptures.Shots with your store poses.
 """)
 
 

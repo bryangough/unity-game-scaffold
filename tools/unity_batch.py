@@ -4,6 +4,7 @@
     python tools/unity_batch.py compile            # import + compile, report `error CS` lines
     python tools/unity_batch.py setup              # first-time setup (TMP essentials, sound bank, main scene)
     python tools/unity_batch.py tests              # EditMode tests -> Builds/Checks/tests.xml, summary printed
+    python tools/unity_batch.py levels             # the level check -> Builds/Checks/levels.md; exit 1 when a level fails
     python tools/unity_batch.py build webgl        # a player build through Editor/PhoneBuilds.cs (webgl|android|ios)
     python tools/unity_batch.py capture            # Play mode for a moment, a 720x1280 shot -> Builds/Checks/views/batch.png
     python tools/unity_batch.py capture Levels     # the same with one of the shell's screens up (Title, Levels, Play,
@@ -137,6 +138,21 @@ def cmd_tests():
     return 0 if failed == "0" and code == 0 else 1
 
 
+def cmd_levels():
+    report = os.path.join(ROOT, "Builds", "Checks", "levels.md")
+    if os.path.exists(report):
+        os.remove(report)  # a stale report must not pass for a new one
+    code, _, errors = run(["-executeMethod", editor_namespace() + ".LevelCheck.Batch"], "levels")
+    if os.path.exists(report):
+        with open(report, encoding="utf-8") as f:
+            print(f.read())
+    else:
+        print("no report (a compile error, or no check registered: see LevelCheck.Game)")
+    ok = code == 0 and not errors and os.path.exists(report)
+    print("LEVELS OK" if ok else "LEVELS FAILED")
+    return 0 if ok else 1
+
+
 def cmd_build(target):
     targets = {"webgl": "WebGL", "android": "Android", "ios": "iOS"}
     if target not in targets:
@@ -159,6 +175,8 @@ if __name__ == "__main__":
         sys.exit(cmd_setup())
     if what == "tests":
         sys.exit(cmd_tests())
+    if what == "levels":
+        sys.exit(cmd_levels())
     if what == "build":
         sys.exit(cmd_build(sys.argv[2] if len(sys.argv) > 2 else ""))
     if what == "capture":

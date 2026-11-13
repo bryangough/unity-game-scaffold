@@ -88,8 +88,10 @@ Owner: __OWNER__ · Executor: AI Assistant · Updated: __DATE__ (made from the s
   every shipped level to a win (a solver, or a perfect-player loop).
 - [ ] **1.3 Levels 2–10, same rules, harder.** Difficulty from layout only; no new rules. *Try:* play 1 → 10 in a
   row; level 10 is tense without anything new having been explained.
-- [ ] **1.4 A level check** from a menu (`Validate Levels`): winnable, at its par, needs its rule, reads at a glance
-  (nothing hidden), starts safe. Writes `Builds/Checks/levels.md`; cached per level so only changed ones are re-run.
+- [ ] **1.4 A level check** (`Checks > Validate Levels`, `python tools/unity_batch.py levels`): winnable, at its par,
+  needs its rule, reads at a glance (nothing hidden), starts safe. The cache, the parallel run, the report
+  (`Builds/Checks/levels.md`) and the stored plans come with the kit (`LevelCheck`); the game writes the check itself
+  (its solver, in plain C#) and registers it as `LevelCheck.Game`, where `SampleChecks` is now.
 - [ ] **1.5 Feel pass.** Hit-stop, shake, bursts, popups at the moments that matter (`GameFeel`); the loss is
   readable (you saw it coming). *Try:* lose on purpose three ways; each one is your fault.
 - [ ] **1.6 Teaching without text.** Level 1 shows the verb (a ghost hand, a lit target); one-line hints at the
@@ -167,8 +169,9 @@ Owner: __OWNER__ · Executor: AI Assistant · Updated: __DATE__ (made from the s
   each kind free), a "new" dot on the collection button; never between the player and the next level.
 - [ ] **5.11 Ending and credits** ("A game by …", a link through `ExternalLink`).
 - [ ] **5.12 The ads / data slot** (`GameServices`): the calls at the moments, the do-nothing default; decision at 6.4.
-- [ ] **5.13 Replay bot.** Every level's solution played through the real game (`InputBot`, one tick a frame) and a
-  report; run before every build.
+- [ ] **5.13 Replay bot.** Every level's stored plan played through the real game (`Checks > Replay Levels`; the
+  driver is the kit's `ReplayBot`, the game registers `LevelReplay.Game` with how one beat of a plan is pressed
+  through `InputBot`, and pins one tick a frame); `Builds/Checks/replay.md`; run before every build.
 - [ ] **5.14 Missions** (`MissionBook`): three up at a time from a pool the game defines over its run report, each done a
   star, one skip a day; a card on the start screen, never between the player and the next level.
 - [ ] **5.15 Back and the dev menu.** Every screen's Back rule in `AppFlow` (Android Back, Esc, B) with a quit confirm
@@ -198,7 +201,7 @@ Owner: __OWNER__ · Executor: AI Assistant · Updated: __DATE__ (made from the s
 
 *Done:* —
 
-- [ ] **7.1** Delete the sample game and its tests once the game's own manager is in.
+- [ ] **7.1** Delete the sample game, its tests and `Editor/SampleChecks.cs` once the game's own manager and check are in.
 - [ ] **7.2** `CLAUDE.md` brought up to date after each move (layout table, controls, conventions).
 - [ ] **7.3** Vendor folders trimmed to what ships; the licence list re-checked.
 - [ ] **7.4** The task list cut down to open work; finished tasks to the archive with their notes.

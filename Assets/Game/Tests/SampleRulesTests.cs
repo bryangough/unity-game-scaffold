@@ -1,3 +1,4 @@
+using GameScaffold.Editor;
 using NUnit.Framework;
 
 namespace GameScaffold.Tests
@@ -107,6 +108,21 @@ namespace GameScaffold.Tests
                 Assert.IsTrue(r.Won, $"level {i + 1} '{SampleLevels.Get(i).title}' wins for a perfect player");
                 Assert.Less(time, SampleLevels.Get(i).seconds, $"level {i + 1} fits its clock");
             }
+        }
+
+        [Test]
+        public void EveryLevel_PassesTheLevelCheck()
+        {
+            // the same check the Validate Levels menu runs, against a throwaway cache
+            string cache = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "SampleLevelCheck_" + System.Guid.NewGuid().ToString("N"));
+            try
+            {
+                LevelCheck.Report r = LevelCheck.Run(SampleChecks.Check(), cache);
+                Assert.AreEqual(SampleLevels.Count, r.Rows.Length);
+                Assert.AreEqual(0, r.Failed, r.Markdown);
+                Assert.IsNotNull(LevelCheck.Plan(SampleChecks.Check(), 0, cache), "a passed level has a plan for the replay");
+            }
+            finally { if (System.IO.Directory.Exists(cache)) System.IO.Directory.Delete(cache, true); }
         }
     }
 }

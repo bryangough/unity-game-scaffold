@@ -177,6 +177,9 @@ namespace GameScaffold
             return z * n + x;
         }
 
+        /// <summary>Where a tile is on screen: a replay bot's finger goes here (<c>SampleChecks</c>).</summary>
+        public Vector2 TileScreenPoint(int index) => cam.WorldToScreenPoint(tileTransforms[index].position);
+
         private void Tap(int index)
         {
             if (!moved) { moved = true; FunTestKit.EndStory(); }

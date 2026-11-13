@@ -10,8 +10,7 @@ namespace GameScaffold.Editor
     /// run on its own for a few seconds, captures the screen to <c>Builds/Checks/views/smoke.png</c>, then presses R
     /// through the real input path and checks the scene came back. An assistant driving the Editor runs this after a
     /// change to see that the game opens, draws and restarts without a hand on it; <c>Logs/FunTest.txt</c> holds any
-    /// result the kit wrote meanwhile. Grow it into a replay (play a stored plan a key per beat with
-    /// <c>Time.captureDeltaTime</c> pinned) once the game has a plan to play.
+    /// result the kit wrote meanwhile. Once the game has plans to play, <see cref="LevelReplay"/> plays every level.
     /// </summary>
     public static class SmokeRun
     {

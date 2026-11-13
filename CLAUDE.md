@@ -13,7 +13,7 @@ three games built the same way. `README.md` is the front page; `docs/method.md`,
 - Names are placeholders that `tools/new_game.py` rewrites: namespace `GameScaffold`, menu root `Menus.Root`
   (`Game/`), `GameInfo.Id / Title / Credit`, Player Settings product and company, `__GAME__`-style tokens in the
   docs and Store templates. Never hard-code a game's name anywhere else.
-- Verify before hand-off: `python tools/unity_batch.py compile`, `tests`, and `setup` into a fresh copy made by
+- Verify before hand-off: `python tools/unity_batch.py compile`, `tests`, `levels`, and `setup` into a fresh copy made by
   `new_game.py` (the smoke test of the whole thing). The project must not be open in another Editor while the batch
   runs (`Temp/UnityLockfile`).
 
@@ -21,10 +21,10 @@ three games built the same way. `README.md` is the front page; `docs/method.md`,
 
 | Path | What |
 |------|------|
-| `Assets/Game/Scripts/Kit/` | `Game.asmdef`, namespace `GameScaffold`. The kit: `FunTestKit`, `GameFeel`, `GameInput`, `TouchInputAdapter`, `InputMode`, `PhoneFit`, `AspectMatch`, `Orientation`, `Progress`, `MissionBook`, `Unlocks`, `AppFlow`, `Shell` + `ShellUI` + `LevelCatalog` (the screens around the game: start, level select, result card, pause, settings), `ScreenFade`, `Sfx` + `SoundBank`, `Haptics`, `GameServices`, `DevMenu`, `UISkin`, `UIText`, `Credits`, `TextLinkOpener`, `ButtonPress`, `Breathe`, `DevFps`, `ExternalLink`, `InputBot`, `GameInfo`. |
+| `Assets/Game/Scripts/Kit/` | `Game.asmdef`, namespace `GameScaffold`. The kit: `FunTestKit`, `GameFeel`, `GameInput`, `TouchInputAdapter`, `InputMode`, `PhoneFit`, `AspectMatch`, `Orientation`, `Progress`, `MissionBook`, `Unlocks`, `AppFlow`, `Shell` + `ShellUI` + `LevelCatalog` (the screens around the game: start, level select, result card, pause, settings), `ScreenFade`, `Sfx` + `SoundBank`, `Haptics`, `GameServices`, `DevMenu`, `UISkin`, `UIText`, `Credits`, `TextLinkOpener`, `ButtonPress`, `Breathe`, `DevFps`, `ExternalLink`, `InputBot`, `ReplayBot` (the replay's driver in Play mode), `GameInfo`. |
 | `Assets/Game/Scripts/Sample/` | `SampleLevel(s)` (levels as data), `SampleRules` (plain C#), `SampleGame` (the manager that presents them, inside the `Shell`'s screens). |
-| `Assets/Game/Editor/` | `Game.Editor.asmdef`. `Menus` (the menu root), `ProjectSetup`, `SceneBuilder` (**source of truth for the scene**), `FunTestKitBuilder`, `PhoneBuilds`, `WebSize`, `TextureCaps` + `MeshCaps`, `MusicBundles`, `StoreBuilds`, `AndroidNoInternet`, `SoundPicks`, `SfxImportRules`, `WavDownsample`, `ArtCutout`, `TestRunnerMenu`, `SavedDataMenu`, `ServicesMenu`, `Captures`, `StoreCaptures`, `ColourCheck`, `TextAudit`, `SmokeRun`, `InputCheck`, `BatchCapture`, `GameViewSize`. |
-| `Assets/Game/Tests/` | `Game.Tests.asmdef` (EditMode, NUnit): `ProgressTests`, `MissionBookTests`, `UnlocksTests`, `AppFlowTests`, `ShellTests`, `SampleRulesTests`, `ColourBlindTests`, `DocsTests` (both `CLAUDE.md` files name every script in `Kit/` and `Editor/`); `EditModeSuite.Run()` for a RunCommand. |
+| `Assets/Game/Editor/` | `Game.Editor.asmdef`. `Menus` (the menu root), `ProjectSetup`, `SceneBuilder` (**source of truth for the scene**), `FunTestKitBuilder`, `PhoneBuilds`, `WebSize`, `TextureCaps` + `MeshCaps`, `MusicBundles`, `StoreBuilds`, `AndroidNoInternet`, `SoundPicks`, `SfxImportRules`, `WavDownsample`, `ArtCutout`, `TestRunnerMenu`, `SavedDataMenu`, `ServicesMenu`, `Captures`, `StoreCaptures`, `ColourCheck`, `TextAudit`, `LevelCheck` (the level check: a cache per level, the misses in parallel, the plans kept) + `LevelReplay` (every plan through the real game), `SampleChecks` (the sample's own, deleted with it), `SmokeRun`, `InputCheck`, `BatchCapture`, `GameViewSize`. |
+| `Assets/Game/Tests/` | `Game.Tests.asmdef` (EditMode, NUnit): `ProgressTests`, `MissionBookTests`, `UnlocksTests`, `AppFlowTests`, `ShellTests`, `LevelCheckTests`, `SampleRulesTests`, `ColourBlindTests`, `DocsTests` (both `CLAUDE.md` files name every script in `Kit/` and `Editor/`); `EditModeSuite.Run()` for a RunCommand. |
 | `Assets/docs/` | `TASKS.md`, `TASKS_archive.md`, `PLAYTEST_NOTES.md`, `art_prompts.md`, `names.md`, `initial/fun_test_record.md` (templates). |
 | `Assets/Plugins/` | `iOS/Haptics.mm`, `WebGL/Haptics.jslib`, `WebGL/ExternalLink.jslib`, `WebGL/WebMusic.jslib`. |
 | `Assets/WebGLTemplates/Game/` | The web page: fills its frame, no footer, focus for keys in an iframe. |

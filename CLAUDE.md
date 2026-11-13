@@ -24,13 +24,14 @@ three games built the same way. `README.md` is the front page; `docs/method.md`,
 | `Assets/Game/Scripts/Kit/` | `Game.asmdef`, namespace `GameScaffold`. The kit: `FunTestKit`, `GameFeel`, `GameInput`, `TouchInputAdapter`, `InputMode`, `PhoneFit`, `AspectMatch`, `Orientation`, `Progress`, `MissionBook`, `Unlocks`, `AppFlow`, `ScreenFade`, `Sfx` + `SoundBank`, `Haptics`, `GameServices`, `DevMenu`, `UISkin`, `UIText`, `Credits`, `TextLinkOpener`, `ButtonPress`, `Breathe`, `DevFps`, `ExternalLink`, `InputBot`, `GameInfo`. |
 | `Assets/Game/Scripts/Sample/` | `SampleLevel(s)` (levels as data), `SampleRules` (plain C#), `SampleGame` (the manager that presents them). |
 | `Assets/Game/Editor/` | `Game.Editor.asmdef`. `Menus` (the menu root), `ProjectSetup`, `SceneBuilder` (**source of truth for the scene**), `FunTestKitBuilder`, `PhoneBuilds`, `WebSize`, `TextureCaps` + `MeshCaps`, `MusicBundles`, `StoreBuilds`, `AndroidNoInternet`, `SoundPicks`, `SfxImportRules`, `WavDownsample`, `ArtCutout`, `TestRunnerMenu`, `SavedDataMenu`, `ServicesMenu`, `Captures`, `StoreCaptures`, `ColourCheck`, `TextAudit`, `SmokeRun`, `InputCheck`, `BatchCapture`, `GameViewSize`. |
-| `Assets/Game/Tests/` | `Game.Tests.asmdef` (EditMode, NUnit): `ProgressTests`, `MissionBookTests`, `UnlocksTests`, `AppFlowTests`, `SampleRulesTests`, `ColourBlindTests`; `EditModeSuite.Run()` for a RunCommand. |
+| `Assets/Game/Tests/` | `Game.Tests.asmdef` (EditMode, NUnit): `ProgressTests`, `MissionBookTests`, `UnlocksTests`, `AppFlowTests`, `SampleRulesTests`, `ColourBlindTests`, `DocsTests` (both `CLAUDE.md` files name every script in `Kit/` and `Editor/`); `EditModeSuite.Run()` for a RunCommand. |
 | `Assets/docs/` | `TASKS.md`, `TASKS_archive.md`, `PLAYTEST_NOTES.md`, `art_prompts.md`, `names.md`, `initial/fun_test_record.md` (templates). |
 | `Assets/Plugins/` | `iOS/Haptics.mm`, `WebGL/Haptics.jslib`, `WebGL/ExternalLink.jslib`, `WebGL/WebMusic.jslib`. |
 | `Assets/WebGLTemplates/Game/` | The web page: fills its frame, no footer, focus for keys in an iframe. |
 | `Assets/Settings/` | URP assets (`Mobile_RPAsset`, `PC_RPAsset`, renderers, the global settings). |
 | `Assets/docs/` | `TASKS.md` (the plan template), `TASKS_archive.md`, `initial/fun_test_record.md`. |
 | `templates/` | `CLAUDE.md` for a game made from the scaffold. |
+| `docs/` | `method.md`, `tasks_guide.md`, `lessons.md`. They are copied into every new game, so write them for a game's assistant as well as for this repo. |
 | `tools/` | `new_game.py`, `graduate.py`, `unity_batch.py`, `web_music.py` (the web build's MP3 stems). |
 | `Store/` | `listing.md`, `privacy.md`, `licences.md` templates. |
 

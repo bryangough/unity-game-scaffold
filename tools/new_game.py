@@ -9,7 +9,8 @@ What it does, in order:
   2. Renames the C# namespace (GameScaffold -> <Namespace>) in every .cs and .asmdef, the editor menu root
      (Game/ -> <Name>/), and GameInfo (Id, Title, Credit).
   3. Sets ProjectSettings: productName, companyName, applicationIdentifier (every platform), a fresh productGUID.
-  4. Fills the placeholders in CLAUDE.md, Assets/docs/TASKS.md and the Store templates (__GAME__, __OWNER__, ...).
+  4. Fills the placeholders in CLAUDE.md, Assets/docs/TASKS.md and the Store templates (__GAME__, __OWNER__, ...);
+     the method docs (docs/) go along, so the game's assistant can read the lessons.
   5. git init + first commit (unless --no-git), and prints what to do next.
 
 Then open the folder in Unity Hub (or run `python tools/unity_batch.py setup`) and start from CLAUDE.md.
@@ -139,15 +140,14 @@ def main():
                 f"[`Assets/docs/TASKS.md`](./Assets/docs/TASKS.md).\n\n"
                 f"- Open the folder in Unity Hub (Unity 6000.6), run **{a.name} > Setup Project (once)**, press Play.\n"
                 f"- Headless: `python tools/unity_batch.py setup`, `tests`, `build webgl`.\n"
+                f"- How the work is done: [`docs/method.md`](./docs/method.md), [`docs/tasks_guide.md`](./docs/tasks_guide.md), "
+                f"and the traps already paid for in [`docs/lessons.md`](./docs/lessons.md).\n"
                 f"- To bring a prototype in from the idea test bed: `python tools/graduate.py <proto folder> {folder}`.\n")
     for name in ("LICENSE",):
         p = os.path.join(folder, name)
         if os.path.exists(p):
             os.remove(p)  # the scaffold's licence is the scaffold's; the game picks its own
-    for name in ("docs",):
-        p = os.path.join(folder, name)
-        if os.path.isdir(p):
-            shutil.rmtree(p)  # the method docs stay with the scaffold; the README links to them
+    # docs/ (the method, the task guide, the lessons) goes with the game: its CLAUDE.md sends the assistant there
     # the game's CLAUDE.md is the template; the scaffold's own is about the scaffold
     tpl = os.path.join(folder, "templates", "CLAUDE.md")
     if os.path.exists(tpl):
@@ -170,7 +170,7 @@ next:
   1. Open the folder in Unity Hub (Unity 6000.6), or: python tools/unity_batch.py setup
   2. In the Editor: {a.name} > Setup Project (once)  (TMP essentials, sound bank, the Main scene), then Play.
   3. Bringing a prototype from the idea test bed? python tools/graduate.py <path to Proto_NN_Name> "{folder}"
-  4. Read CLAUDE.md, then fill in Assets/docs/TASKS.md: "Where the game is", the bar, phase 1.
+  4. Read CLAUDE.md and docs/lessons.md, then fill in Assets/docs/TASKS.md: "Where the game is", the bar, phase 1.
   5. Once your own game manager is in, delete Assets/Game/Scripts/Sample/ and Tests/SampleRulesTests.cs; keep the Kit.
      Two files point at the sample and are yours to rewire: Editor/SceneBuilder.cs (your scene) and
      Tests/ColourBlindTests.cs (your colours). Then fill in StoreCaptures.Shots with your store poses.

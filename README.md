@@ -21,7 +21,7 @@ use freely (MIT). Your own packs stay on a shelf outside the project and only th
 | `Assets/WebGLTemplates/Game/` | The web page: fills an itch.io frame or a phone browser at 9:16, no footer, keys work inside the frame. |
 | `CLAUDE.md` | What an AI assistant reads first: the layout, the stack, the conventions. `templates/CLAUDE.md` is the game version. |
 | `docs/` | [`method.md`](docs/method.md) (idea → two-minute playable → verdict → own project → milestones → store), [`tasks_guide.md`](docs/tasks_guide.md) (how the task list works and why), [`lessons.md`](docs/lessons.md) (the tricks and the traps, most of them learned with an assistant driving the Editor). |
-| `tools/` | `new_game.py` (a new project from the scaffold, renamed and ready; landscape or portrait, with the sample or a stub), `sync_kit.py` (a kit fix made in one game reaches the scaffold and the other games: it reports which side changed each file, pulls the scaffold's newer ones, pushes a game's fix back), `smoke.py` (fresh games made and run headless: the scaffold's own check), `graduate.py` (bring a prototype over from an idea test bed), `unity_batch.py` (compile, set up, test and build headless), `web_music.py` (the web build's small MP3 music; optional). |
+| `tools/` | `new_game.py` (a new project from the scaffold, renamed and ready; landscape or portrait, with the sample or a stub; `--into` lays it over a project that already exists), `sync_kit.py` (a kit fix made in one game reaches the scaffold and the other games: it reports which side changed each file, pulls the scaffold's newer ones, pushes a game's fix back), `smoke.py` (fresh games made and run headless: the scaffold's own check), `graduate.py` (bring a prototype over from an idea test bed), `unity_batch.py` (compile, set up, test and build headless), `web_music.py` (the web build's small MP3 music; optional). |
 | `Store/` | Templates for the listing (with the store rules learned shipping two games: screenshot sizes, ratings, itch.io settings, a pre-submission checklist), the privacy policy and the licence list. |
 
 ## Quick start
@@ -57,6 +57,14 @@ verdict, and the winners moved out. `tools/graduate.py <Proto folder> <new proje
 new project's assemblies and namespace, rewrites the kit calls, lists what still reads legacy input, and writes
 `Assets/docs/initial/fun_test_record.md` from the test bed's task row, playtest notes and design doc. The method is
 in [`docs/method.md`](docs/method.md).
+
+**Into a project that already exists.** A prototype that left the test bed before it had a scaffold project, or a
+game made by hand: `python tools/new_game.py "My Game" --into D:/Unity/MyGame --no-sample`. It adds what the project
+lacks (with the scaffold's `.meta` files, so `sync_kit.py` works afterwards), keeps every file the project already
+has and lists where the scaffold's differs, never touches `Assets/docs/TASKS.md` or `Assets/docs/initial/`, takes the
+scaffold's `ProjectSettings/` and URP assets (keeping the `productGUID`) and adds the missing packages. It wants a
+clean git tree and commits nothing, so `git diff` is the review. `graduate.py` then works on a prototype folder
+inside that same project (`--testbed <folder>` tells it where the test bed's docs are, if it still has the row).
 
 **From scratch.** `new_game.py`, then write the pitch and the bar into `TASKS.md` and build the first playable loop
 where the sample was: input → the core verb → feedback → a win and a lose both reachable in two minutes → restart.

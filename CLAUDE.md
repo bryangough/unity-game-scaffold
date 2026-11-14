@@ -14,7 +14,8 @@ three games built the same way. `README.md` is the front page; `docs/method.md`,
   (`Game/`), `GameInfo.Id / Title / Credit`, Player Settings product and company, `__GAME__`-style tokens in the
   docs and Store templates. Never hard-code a game's name anywhere else.
 - Verify before hand-off: `python tools/unity_batch.py compile`, `tests`, `levels`, then `python tools/smoke.py`
-  (fresh games made by `new_game.py`, with and without the sample, portrait and landscape, each set up, tested and
+  (fresh games made by `new_game.py`, with and without the sample, portrait and landscape, and an existing project
+  adopted with `--into` and graduated in place, each set up, tested and
   level-checked headless: the smoke test of the whole thing). The project must not be open in another Editor while the batch
   runs (`Temp/UnityLockfile`).
 
@@ -33,7 +34,7 @@ three games built the same way. `README.md` is the front page; `docs/method.md`,
 | `Assets/docs/` | `TASKS.md` (the plan template), `TASKS_archive.md`, `initial/fun_test_record.md`. |
 | `templates/` | `CLAUDE.md` for a game made from the scaffold; `game/` is the stub `new_game.py --no-sample` puts where the sample was (`GameRules`, `GameLevels`, `GameManager`, `GameScene`, `GameChecks`, `GameRulesTests`). It is not compiled here: `tools/smoke.py` compiles and tests it. |
 | `docs/` | `method.md`, `tasks_guide.md`, `lessons.md`. They are copied into every new game, so write them for a game's assistant as well as for this repo. |
-| `tools/` | `new_game.py` (`--landscape`, `--no-sample`; its rewrite rules are the single list `text_pairs`), `sync_kit.py` (kit fixes between a game and the scaffold, from the game's `.scaffold.json`), `smoke.py`, `graduate.py`, `unity_batch.py`, `web_music.py` (the web build's MP3 stems). |
+| `tools/` | `new_game.py` (`--landscape`, `--no-sample`; its rewrite rules are the single list `text_pairs`; `--into <project>` makes the game in a temporary folder and lays it over an existing project: `adopt` holds the rules for what is added, kept, replaced and merged), `sync_kit.py` (kit fixes between a game and the scaffold, from the game's `.scaffold.json`), `smoke.py`, `graduate.py`, `unity_batch.py`, `web_music.py` (the web build's MP3 stems). |
 | `Store/` | `listing.md`, `privacy.md`, `licences.md` templates. |
 
 ## Stack and conventions

@@ -34,7 +34,12 @@ A graduate gets its own project **made from this scaffold** (`tools/new_game.py`
 bed** once copied, so work on it happens in one place. `tools/graduate.py` moves the scripts into the game's
 assemblies and namespace, and writes `Assets/docs/initial/fun_test_record.md`: the test bed's task row (how it was
 built), the owner's playtest lines, and the design doc. That record is kept for the life of the game as "where this
-came from"; the plan lives in `TASKS.md`.
+came from"; the plan lives in `TASKS.md`. A record the project already has is never replaced.
+
+A prototype that was copied out by hand, into a project with no scaffold, gets it afterwards:
+`tools/new_game.py "<name>" --into <project>` lays the scaffold over the project (its plan, its record and its own
+files are kept; the change is left uncommitted for `git diff`), and `graduate.py` then runs on the prototype folder
+inside it.
 
 Graduation changes the rules: Input System only (the test bed tolerated legacy keys), portrait, a save, a phased
 plan. The first commits are housekeeping: own the code (`Assets/Game/`, a namespace, a menu), the scene from

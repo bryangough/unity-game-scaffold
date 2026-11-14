@@ -4,6 +4,7 @@
     python tools/new_game.py "Cloak & Crate" --company "Your Studio" --bundle com.yourstudio.cloakandcrate
     python tools/new_game.py "Splat Swap" --folder D:/Unity/SplatSwap --namespace SplatSwap --no-git
     python tools/new_game.py "Slope Run" --landscape --no-sample
+    python tools/new_game.py "Still Frame" --into D:/Unity/StillFrame --no-sample   # adopt a project that already exists
 
 What it does, in order:
   1. Checks the names it was given (a namespace that is a real C# name and not one of the kit's classes, a bundle id
@@ -20,6 +21,21 @@ What it does, in order:
   7. Writes .scaffold.json (what it was made with and from which scaffold commit; tools/sync_kit.py reads it to
      carry kit fixes between the game and the scaffold), then git init + first commit (unless --no-git).
 
+--into <project> puts the scaffold into a Unity project that already exists (a prototype that left the test bed before
+it had a scaffold project, a game made by hand). The game is made in a temporary folder exactly as above, then laid
+over the project:
+  - a file the project does not have is added, with its .meta (so GUIDs match the scaffold's and sync_kit.py works);
+  - a file the project already has is kept. Where the scaffold's differs, it is listed; for a .md it is also written
+    beside the project's as <name>.scaffold.md to merge by hand (CLAUDE.md must end up naming every kit and editor
+    script: DocsTests checks). Assets/docs/TASKS.md and Assets/docs/initial/ are never touched;
+  - ProjectSettings/ and Assets/Settings/ are the scaffold's (the kit depends on them: Input System only, no domain
+    reload, the web template, the URP assets), keeping the project's productGUID and Unity version. Each file
+    replaced is listed;
+  - Packages/manifest.json gains the packages it lacks (versions the project already pins are left alone and listed);
+    .gitignore gains the lines it lacks.
+The project must be a git repository with nothing uncommitted (--allow-dirty to skip that), so `git diff` shows what
+changed and `git checkout .` takes it back. Nothing is committed.
+
 Then open the folder in Unity Hub (or run `python tools/unity_batch.py setup`) and start from CLAUDE.md.
 To bring a prototype over from the idea test bed, run tools/graduate.py on the new project afterwards.
 """
@@ -31,6 +47,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tempfile
 import uuid
 
 SCAFFOLD = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -255,25 +272,9 @@ def scaffold_commit():
         return None, False
 
 
-def main():
-    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("name", help='the game\'s name as shown to people, e.g. "Cloak & Crate"')
-    ap.add_argument("--folder", help="where to make it (default: a sibling of the scaffold named after the game)")
-    ap.add_argument("--namespace", help="C# namespace and asmdef root (default: the name in PascalCase)")
-    ap.add_argument("--company", default="Your Studio", help="companyName in Player Settings and the credits line")
-    ap.add_argument("--bundle", help="application identifier, e.g. com.yourstudio.cloakandcrate")
-    ap.add_argument("--owner", default="the owner", help="who decides (used in TASKS.md / CLAUDE.md placeholders)")
-    ap.add_argument("--website", default="", help="the link on the credits card (may be empty)")
-    ap.add_argument("--landscape", action="store_true", help="a landscape game: 1280 x 720 canvas, 16:9 camera fit, landscape Player Settings")
-    ap.add_argument("--no-sample", action="store_true", help="leave the sample game out; start from a small stub (rules, levels, manager, check, tests)")
-    ap.add_argument("--no-git", action="store_true", help="skip git init and the first commit")
-    a = ap.parse_args()
-
-    c = make_config(a)
-    folder = os.path.abspath(a.folder or os.path.join(os.path.dirname(SCAFFOLD), pascal(c["name"])))
-    if os.path.exists(folder) and os.listdir(folder):
-        sys.exit(f"{folder} exists and is not empty; pick another --folder")
-
+def build(c, folder, shown=None):
+    """The game made from config c in an empty folder. `shown` is the path the docs name when the files are headed
+    somewhere else (--into)."""
     print(f"copying scaffold -> {folder}")
     copy_tree(SCAFFOLD, folder)
     if not c["sample"]:
@@ -281,7 +282,7 @@ def main():
         print("sample game left out; the stub is in Assets/Game (Scripts/GameRules.cs, GameLevels.cs, GameManager.cs, ...)")
 
     today = datetime.date.today().isoformat()
-    pairs = text_pairs(c, folder, today)
+    pairs = text_pairs(c, shown or folder, today)
     changed = 0
     for root, dirs, files in os.walk(folder):
         dirs[:] = [d for d in dirs if d not in SKIP_DIRS]
@@ -301,6 +302,8 @@ def main():
     s = re.sub(r"companyName: .*", lambda m: "companyName: " + yaml_scalar(c["company"]), s)
     s = re.sub(r"productName: .*", lambda m: "productName: " + yaml_scalar(c["name"]), s)
     s = s.replace("com.yourstudio.gamescaffold", c["bundle"])
+    s = re.sub(r"metroPackageName: .*", lambda m: "metroPackageName: " + pascal(c["name"]), s)
+    s = re.sub(r"metroApplicationDescription: .*", lambda m: "metroApplicationDescription: " + yaml_scalar(c["name"]), s)
     if c["landscape"]:
         for old, new in LANDSCAPE_SETTINGS:
             if old not in s:
@@ -319,8 +322,8 @@ def main():
                 f"- Headless: `python tools/unity_batch.py setup`, `tests`, `levels`, `build webgl`.\n"
                 f"- How the work is done: [`docs/method.md`](./docs/method.md), [`docs/tasks_guide.md`](./docs/tasks_guide.md), "
                 f"and the traps already paid for in [`docs/lessons.md`](./docs/lessons.md).\n"
-                f"- To bring a prototype in from the idea test bed: `python tools/graduate.py <proto folder> {folder}`.\n"
-                f"- Kit fixes travel both ways: `python tools/sync_kit.py {folder}`, run from the scaffold.\n")
+                f"- To bring a prototype in from the idea test bed: `python tools/graduate.py <proto folder> {shown or folder}`.\n"
+                f"- Kit fixes travel both ways: `python tools/sync_kit.py {shown or folder}`, run from the scaffold.\n")
     os.remove(os.path.join(folder, "LICENSE")) if os.path.exists(os.path.join(folder, "LICENSE")) else None  # the game picks its own
     # docs/ (the method, the task guide, the lessons) goes with the game: its CLAUDE.md sends the assistant there
     # the game's CLAUDE.md is the template; the scaffold's own is about the scaffold
@@ -337,6 +340,187 @@ def main():
     with open(os.path.join(folder, STAMP), "w", encoding="utf-8", newline="\n") as f:
         json.dump(stamp, f, indent=2)
         f.write("\n")
+
+
+TAKE_DIRS = ("ProjectSettings/", "Assets/Settings/")  # the kit depends on these: the scaffold's win
+KEEP_ALWAYS = ("Assets/docs/TASKS.md", "Assets/docs/initial/")  # the project's plan and its history: never touched
+VERSION_FILE = "ProjectSettings/ProjectVersion.txt"
+LOCK_FILE = "Packages/packages-lock.json"  # Unity rewrites it from the manifest
+
+
+def same_file(a, b):
+    with open(a, "rb") as f, open(b, "rb") as g:
+        x, y = f.read(), g.read()
+    return x == y or x.replace(b"\r\n", b"\n") == y.replace(b"\r\n", b"\n")
+
+
+def merge_manifest(src, dst):
+    """The packages the project lacks are added; a version it already pins is left alone. Returns (added, differing)."""
+    with open(src, encoding="utf-8") as f:
+        ours = json.load(f)
+    with open(dst, encoding="utf-8") as f:
+        theirs = json.load(f)
+    deps = theirs.setdefault("dependencies", {})
+    added, differing = [], []
+    for name, version in ours.get("dependencies", {}).items():
+        if name not in deps:
+            deps[name] = version
+            added.append(f"{name} {version}")
+        elif deps[name] != version:
+            differing.append(f"{name}: yours {deps[name]}, the scaffold's {version}")
+    if added:
+        theirs["dependencies"] = dict(sorted(deps.items(), key=lambda kv: (kv[0].startswith("com.unity.modules."), kv[0])))
+        with open(dst, "w", encoding="utf-8", newline="\n") as f:
+            json.dump(theirs, f, indent=2)
+            f.write("\n")
+    return added, differing
+
+
+def merge_gitignore(src, dst):
+    with open(src, encoding="utf-8") as f:
+        ours = f.read().splitlines()
+    with open(dst, encoding="utf-8") as f:
+        text = f.read()
+    have = {line.strip() for line in text.splitlines()}
+    missing = [line for line in ours if line.strip() and not line.startswith("#") and line.strip() not in have]
+    if missing:
+        with open(dst, "w", encoding="utf-8", newline="\n") as f:
+            f.write(text.rstrip("\n") + "\n\n# from the game scaffold\n" + "\n".join(missing) + "\n")
+    return missing
+
+
+def check_adoptable(project, allow_dirty):
+    if not (os.path.isdir(os.path.join(project, "Assets")) and os.path.isdir(os.path.join(project, "ProjectSettings"))):
+        sys.exit(f"--into {project}: not a Unity project (no Assets/ and ProjectSettings/)")
+    if os.path.exists(os.path.join(project, STAMP)):
+        sys.exit(f"--into {project}: it already has {STAMP}; carry kit changes with tools/sync_kit.py instead")
+    if os.path.exists(os.path.join(project, "Temp", "UnityLockfile")):
+        sys.exit(f"--into {project}: the project is open in a Unity Editor (Temp/UnityLockfile); close it first")
+    if allow_dirty:
+        return
+    try:
+        dirty = subprocess.check_output(["git", "status", "--porcelain"], cwd=project, text=True, stderr=subprocess.DEVNULL).strip()
+    except Exception:  # noqa: BLE001
+        sys.exit(f"--into {project}: not a git repository, so the change could not be reviewed or taken back. "
+                 "`git init` and commit first, or pass --allow-dirty.")
+    if dirty:
+        sys.exit(f"--into {project}: uncommitted changes:\n{dirty}\ncommit or stash them first (or --allow-dirty), "
+                 "so `git diff` shows only what the scaffold changed")
+
+
+def adopt(made, project):
+    """Lays the game in `made` over an existing project. Returns the report as lines."""
+    added, kept, replaced, beside, report = 0, [], [], [], []
+    guid = None
+    ps = os.path.join(project, "ProjectSettings", "ProjectSettings.asset")
+    if os.path.exists(ps):
+        with open(ps, encoding="utf-8", errors="replace") as f:
+            m = re.search(r"productGUID: ([0-9a-f]+)", f.read())
+        guid = m.group(1) if m else None
+    for root, dirs, files in os.walk(made):
+        dirs[:] = [d for d in dirs if d not in SKIP_DIRS]
+        for name in files:
+            src = os.path.join(root, name)
+            rel = os.path.relpath(src, made).replace("\\", "/")
+            dst = os.path.join(project, rel)
+            if rel == LOCK_FILE:
+                continue
+            if not os.path.exists(dst):
+                os.makedirs(os.path.dirname(dst), exist_ok=True)
+                shutil.copy2(src, dst)
+                added += 1
+                continue
+            if rel.startswith(KEEP_ALWAYS):
+                continue
+            if rel == VERSION_FILE:
+                if not same_file(src, dst):
+                    report.append("Unity version: the project's ProjectVersion.txt differs from the scaffold's and was kept; "
+                                  "the kit is written for the scaffold's")
+                continue
+            if rel == "Packages/manifest.json":
+                new, differing = merge_manifest(src, dst)
+                report += [f"package added: {p}" for p in new] + [f"package version kept: {p}" for p in differing]
+                continue
+            if rel == ".gitignore":
+                missing = merge_gitignore(src, dst)
+                if missing:
+                    report.append(f".gitignore: {len(missing)} line(s) added")
+                continue
+            if same_file(src, dst):
+                continue
+            if rel.startswith(TAKE_DIRS):
+                shutil.copy2(src, dst)
+                replaced.append(rel)
+            elif rel.endswith(".md"):
+                side = dst[:-3] + ".scaffold.md"
+                shutil.copy2(src, side)
+                beside.append(f"{rel}  (the scaffold's is beside it: {os.path.basename(side)})")
+            else:
+                kept.append(rel)
+    if guid:
+        with open(ps, encoding="utf-8") as f:
+            text = f.read()
+        with open(ps, "w", encoding="utf-8", newline="\n") as f:
+            f.write(re.sub(r"productGUID: [0-9a-f]+", "productGUID: " + guid, text))
+    report.insert(0, f"{added} file(s) added")
+    for title, rows in (("replaced with the scaffold's (your version is in git)", replaced),
+                        ("kept yours; merge the scaffold's by hand", beside),
+                        ("kept yours where the scaffold's differs (for a .meta that means two GUIDs for one file: take the "
+                         "scaffold's .meta if nothing of yours references it)", kept)):
+        if rows:
+            report.append(f"{title} ({len(rows)}):")
+            report += ["  " + r for r in rows]
+    return report
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("name", help='the game\'s name as shown to people, e.g. "Cloak & Crate"')
+    ap.add_argument("--folder", help="where to make it (default: a sibling of the scaffold named after the game)")
+    ap.add_argument("--namespace", help="C# namespace and asmdef root (default: the name in PascalCase)")
+    ap.add_argument("--company", default="Your Studio", help="companyName in Player Settings and the credits line")
+    ap.add_argument("--bundle", help="application identifier, e.g. com.yourstudio.cloakandcrate")
+    ap.add_argument("--owner", default="the owner", help="who decides (used in TASKS.md / CLAUDE.md placeholders)")
+    ap.add_argument("--website", default="", help="the link on the credits card (may be empty)")
+    ap.add_argument("--landscape", action="store_true", help="a landscape game: 1280 x 720 canvas, 16:9 camera fit, landscape Player Settings")
+    ap.add_argument("--no-sample", action="store_true", help="leave the sample game out; start from a small stub (rules, levels, manager, check, tests)")
+    ap.add_argument("--no-git", action="store_true", help="skip git init and the first commit")
+    ap.add_argument("--into", metavar="PROJECT", help="adopt an existing Unity project: lay the scaffold over it instead of making a new folder")
+    ap.add_argument("--allow-dirty", action="store_true", help="with --into: do not insist on a clean git working tree")
+    a = ap.parse_args()
+
+    c = make_config(a)
+    if a.into:
+        if a.folder:
+            sys.exit("--into and --folder: pick one")
+        project = os.path.abspath(a.into)
+        check_adoptable(project, a.allow_dirty)
+        tmp = tempfile.mkdtemp(prefix="scaffold_adopt_")
+        try:
+            made = os.path.join(tmp, "Game")
+            build(c, made, shown=project)
+            print(f"laying it over {project}")
+            for line in adopt(made, project):
+                print("  " + line)
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+        print(f"""
+done: {project} (nothing committed; `git status` and `git diff` show the change)
+
+next:
+  1. Merge the .scaffold.md files into yours and delete them. CLAUDE.md must name every script in Scripts/Kit and
+     Editor (DocsTests fails otherwise): the scaffold's layout table is the quickest way.
+  2. python tools/unity_batch.py setup   (or open it and run {c['name']} > Setup Project (once)), then compile and tests.
+  3. Your own code is still where it was. If it is a test-bed prototype (Assets/Prototypes/Proto_NN_Name):
+     python tools/graduate.py <that folder> "{project}"   (run from the scaffold; a prototype inside the project is fine)
+  4. Commit: chore(phase0): onto the game scaffold
+""")
+        return
+
+    folder = os.path.abspath(a.folder or os.path.join(os.path.dirname(SCAFFOLD), pascal(c["name"])))
+    if os.path.exists(folder) and os.listdir(folder):
+        sys.exit(f"{folder} exists and is not empty; pick another --folder, or --into {folder} to adopt that project")
+    build(c, folder)
 
     if not a.no_git:
         try:

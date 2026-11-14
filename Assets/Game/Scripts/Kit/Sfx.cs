@@ -83,7 +83,11 @@ namespace GameScaffold
             else if (e.streamed)
             {
                 // packed in its own AssetBundle: load it, then play, if this is still the track wanted
-                if (s.musicEntry != null && s.musicEntry.id != id) StopMusic();
+                if (s.musicEntry != null && s.musicEntry.id != id)
+                {
+                    StopMusic();          // the old track fades out...
+                    s.wantedMusic = id;   // ...but the new one is still the one wanted once it has loaded
+                }
                 if (!s.loading.Contains(id)) s.StartCoroutine(s.LoadStreamed(e, fadeIn));
                 return;
             }
@@ -217,6 +221,15 @@ namespace GameScaffold
         /// <summary>How hard the music plays, 0..1: 0 is the calm stem, 1 the full one.</summary>
         public static void MusicIntensity(float t) { Get().intensity = Mathf.Clamp01(t); }
 
+        /// <summary>
+        /// Plays the music faster or slower, pitch and tempo together like tape (1 = as recorded; 0.5 = half speed, an
+        /// octave down). While it is not 1 the next loop is re-timed from where the playing stems really are, so the
+        /// loop stays seamless at any speed; at 1 the scheduling is the exact one it always was.
+        /// </summary>
+        public static void MusicPitch(float p) { Get().musicPitch = Mathf.Clamp(p, 0.3f, 2f); }
+
+        private float musicPitch = 1f, appliedPitch = 1f;
+
         private void UpdateMusic()
         {
             if (musicEntry == null) return;
@@ -242,6 +255,23 @@ namespace GameScaffold
             }
             double now = AudioSettings.dspTime;
             double period = musicEntry.Period;
+            if (!Mathf.Approximately(musicPitch, 1f) || !Mathf.Approximately(appliedPitch, 1f))
+            {
+                foreach (AudioSource m in music) m.pitch = musicPitch;
+                appliedPitch = musicPitch;
+                // re-time the next loop from the playing stem's position (clip seconds), at the pitch it plays now
+                AudioSource cur = music[musicCur];
+                if (cur.isPlaying && cur.clip != null)
+                {
+                    double next = now + (period - cur.time) / musicPitch;
+                    if (System.Math.Abs(next - nextLoopDsp) > 0.005)
+                    {
+                        nextLoopDsp = next;
+                        if (otherScheduled)
+                            for (int k = 0; k < stems; k++) music[k * 2 + 1 - musicCur].SetScheduledStartTime(nextLoopDsp);
+                    }
+                }
+            }
             if (otherScheduled && now >= nextLoopDsp)
             {
                 musicCur = 1 - musicCur;

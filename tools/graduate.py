@@ -6,7 +6,7 @@
     python tools/graduate.py D:/Unity/MyGame/Assets/Prototypes/Proto_53_MyGame D:/Unity/MyGame --testbed D:/Unity/IdeaTestBed
 
 What it does:
-  1. Copies the prototype's Scripts/ into <project>/Assets/Game/Scripts/<ProtoName>/ and its Editor/ into
+  1. Copies the prototype's Scripts/ (with each script's .meta, so its GUID is kept) into <project>/Assets/Game/Scripts/<ProtoName>/ and its Editor/ into
      <project>/Assets/Game/Editor/<ProtoName>/ (scenes are not copied: the builder regenerates them).
   2. Wraps every copied file that has no namespace in the project's namespace (from Game.asmdef), so it lands in the
      Game / Game.Editor assemblies beside the kit. (--no-wrap to skip.) The test bed's root namespace becomes the
@@ -140,6 +140,8 @@ def main():
             if devices and dest_root == "Scripts":
                 device_reads.append(os.path.join(dest_root, short, rel) + "  (" + ", ".join(d + ".current" for d in devices) + ")")
             write(dst, s)
+            if os.path.exists(p + ".meta") and not os.path.exists(dst + ".meta"):
+                shutil.copy2(p + ".meta", dst + ".meta")  # the same GUID: a scene, prefab or asset that names the script still finds it
             copied.append(dst)
     print(f"copied {len(copied)} scripts ({len(wrapped)} wrapped in namespace {ns})")
 

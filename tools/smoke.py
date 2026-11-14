@@ -42,6 +42,7 @@ def step(label, cmd, cwd=None):
 PLAN = "# Smoke Game: the project's own plan\n"
 RECORD = "# The project's own record\n\n" + "\n".join(f"- line {i}: what the owner said" for i in range(8)) + "\n"
 GUID = "0123456789abcdef0123456789abcdef"
+SCRIPT_GUID = "fedcba9876543210fedcba9876543210"
 PROTO = """using MobilePrototypes.Common;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -71,6 +72,7 @@ def make_old_project(folder):
     """A project as a prototype leaves a test bed by hand: the prototype, the old kit, a plan, a record, in git."""
     files = {
         "Assets/Prototypes/Proto_07_SmokeGame/Scripts/SmokeProto.cs": PROTO,
+        "Assets/Prototypes/Proto_07_SmokeGame/Scripts/SmokeProto.cs.meta": f"fileFormatVersion: 2\nguid: {SCRIPT_GUID}\n",
         "Assets/Prototypes/Proto_07_SmokeGame/README.md": "# 07 Smoke Game\n\nThe rules as played.\n",
         "Assets/Prototypes/Common/FunTestKit.cs": OLD_KIT,
         "Assets/docs/TASKS.md": PLAN,
@@ -115,6 +117,9 @@ def check_adopted(folder):
         code = read(moved)
         if "namespace SmokeGame\n" not in code or "SmokeGame.SmokeGame" in code or "MobilePrototypes" in code:
             bad.append("the prototype did not land in namespace SmokeGame")
+    meta = moved + ".meta"
+    if not os.path.exists(meta) or SCRIPT_GUID not in read(meta):
+        bad.append("the prototype's script lost its GUID (its .meta was not copied)")
     if not os.path.exists(os.path.join(folder, "Assets/docs/rules.md")):
         bad.append("the prototype's README.md was not copied to Assets/docs/rules.md")
     return bad

@@ -223,6 +223,7 @@ namespace GameScaffold
         {
             TextMeshProUGUI t = ShellUI.Label(parent, "Text_Heading", text, size, TitleCol, ShellUI.Centre, position, new Vector2(width, size * 1.4f), skin);
             t.fontStyle = FontStyles.Bold;
+            if (skin != null) skin.Display(t);
             return t;
         }
 
@@ -272,6 +273,7 @@ namespace GameScaffold
                 title.enableAutoSizing = true;
                 title.fontSizeMin = 44f;
                 title.fontSizeMax = 84f;
+                if (skin != null) skin.Display(title);
                 title.gameObject.AddComponent<Breathe>();
             }
             titleStars = ShellUI.Label(t, "Text_Stars", "", 30f, SoftCol, ShellUI.Centre, new Vector2(0f, wide ? 104f : 168f), new Vector2(600f, 50f), skin);
@@ -297,6 +299,7 @@ namespace GameScaffold
             bool wide = Wide; // landscape: a wider, shorter grid, and BACK between the page arrows
             TextMeshProUGUI head = ShellUI.Label(t, "Text_Heading", "LEVELS", wide ? 48f : 56f, TitleCol, new Vector2(0.5f, 1f), new Vector2(0f, wide ? -62f : -110f), new Vector2(600f, wide ? 70f : 90f), skin);
             head.fontStyle = FontStyles.Bold;
+            if (skin != null) skin.Display(head);
 
             float gridW = Columns * Tile + (Columns - 1) * Gap, gridH = Rows * Tile + (Rows - 1) * Gap;
             RectTransform grid = ShellUI.Box(t, "Grid", ShellUI.Centre, new Vector2(0f, wide ? 14f : 42f), new Vector2(gridW, gridH));

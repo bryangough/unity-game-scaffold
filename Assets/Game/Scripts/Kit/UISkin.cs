@@ -20,6 +20,10 @@ namespace GameScaffold
         public TMPro.TMP_FontAsset tmpFont;
         [Tooltip("Scales every font size (a wide font wants a little less).")]
         public float fontScale = 1f;
+        [Tooltip("The display face for the title, the headings, YOU WIN / YOU LOSE and the countdown; none = tmpFont.")]
+        public TMPro.TMP_FontAsset displayFont;
+        [Tooltip("Scales a display label against the size it was asked for (a condensed face wants a little more).")]
+        public float displayScale = 1f;
 
         [Header("Sprites (9-sliced)")]
         [Tooltip("The card behind a screen's content, over the dim.")]
@@ -64,6 +68,9 @@ namespace GameScaffold
         public Sprite arrowRight;
         public Sprite pause;
         public Sprite gear;
+        [Tooltip("A 9-sliced badge behind the countdown (FunTestKit.StyleTimer); none = the bare outlined number.")]
+        public Sprite timerBadge;
+        public Color timerBadgeTint = Color.white;
 
         [Header("Text")]
         public Color title = new Color(0.95f, 0.85f, 0.45f);
@@ -114,6 +121,21 @@ namespace GameScaffold
                 trim.color = role == Role.Primary ? buttonPrimaryTrimTint : role == Role.Danger ? buttonDangerTrimTint : buttonTrimTint;
             }
             return role == Role.Primary ? buttonPrimaryText : buttonText;
+        }
+
+        /// <summary>
+        /// Sets a title or heading in the display face, when the skin has one: the face, no faked bold, and the size it
+        /// was asked for times <see cref="displayScale"/> (the body font's <see cref="fontScale"/> is taken back out).
+        /// Call once, after the label is made.
+        /// </summary>
+        public void Display(TMPro.TMP_Text t)
+        {
+            if (t == null || displayFont == null) return;
+            t.font = displayFont;
+            t.fontStyle = TMPro.FontStyles.Normal;
+            float k = displayScale / Mathf.Max(0.01f, fontScale);
+            t.fontSize *= k;
+            if (t.enableAutoSizing) { t.fontSizeMin *= k; t.fontSizeMax *= k; }
         }
 
         /// <summary>Dresses a card: the panel sprite and tint, plus the border layer when the skin has one.</summary>

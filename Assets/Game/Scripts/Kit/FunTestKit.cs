@@ -49,6 +49,8 @@ namespace GameScaffold
         public static float DesignAspect = 9f / 16f;
 
         private TextMeshProUGUI timerText;
+        private Func<float, string> timerFormat;
+        private Image timerBadge;
         private TextMeshProUGUI calloutText;
         private float calloutUntil;
         private bool storyShowing;
@@ -163,6 +165,40 @@ namespace GameScaffold
             if (Instance != null && Instance.timerText != null) Instance.timerText.enabled = on;
         }
 
+        /// <summary>
+        /// Dresses the countdown (once, after the kit's Awake): a display font, the text for the seconds left (null =
+        /// whole seconds, "94") and, when <paramref name="badge"/> is set, a 9-sliced badge of <paramref name="size"/>
+        /// behind the number, which shows and hides with it.
+        /// </summary>
+        public static void StyleTimer(TMP_FontAsset font, Func<float, string> format, Sprite badge, Color badgeTint, Vector2 size)
+        {
+            if (Instance == null || Instance.timerText == null) return;
+            TextMeshProUGUI t = Instance.timerText;
+            if (font != null) { t.font = font; t.fontStyle = FontStyles.Normal; }
+            Instance.timerFormat = format;
+            if (badge == null) return;
+            RectTransform tr = t.rectTransform;
+            tr.sizeDelta = size;
+            t.alignment = TextAlignmentOptions.Center;
+            if (Instance.timerBadge == null)
+            {
+                var go = new GameObject("TimerBadge", typeof(RectTransform), typeof(Image));
+                var r = (RectTransform)go.transform;
+                r.SetParent(tr.parent, false);
+                r.SetSiblingIndex(tr.GetSiblingIndex()); // drawn under the number
+                Instance.timerBadge = go.GetComponent<Image>();
+                Instance.timerBadge.raycastTarget = false;
+            }
+            RectTransform br = Instance.timerBadge.rectTransform;
+            br.anchorMin = tr.anchorMin; br.anchorMax = tr.anchorMax; br.pivot = tr.pivot;
+            br.anchoredPosition = tr.anchoredPosition;
+            br.sizeDelta = size;
+            Instance.timerBadge.sprite = badge;
+            Instance.timerBadge.type = Image.Type.Sliced;
+            Instance.timerBadge.color = badgeTint;
+            Instance.timerBadge.enabled = t.gameObject.activeSelf && t.enabled;
+        }
+
         public static void StopTimer()
         {
             if (Instance != null) Instance.timerRunning = false;
@@ -231,8 +267,13 @@ namespace GameScaffold
 
             if (timerText.gameObject.activeSelf)
             {
-                timerText.text = Mathf.CeilToInt(timeLeft).ToString();
+                timerText.text = timerFormat != null ? timerFormat(timeLeft) : Mathf.CeilToInt(timeLeft).ToString();
                 timerText.color = timeLeft <= 10f ? new Color(1f, 0.35f, 0.3f) : Color.white;
+            }
+            if (timerBadge != null)
+            {
+                bool shown = timerText.gameObject.activeSelf && timerText.enabled;
+                if (timerBadge.enabled != shown) timerBadge.enabled = shown;
             }
 
             if (calloutText.text.Length > 0 && (Time.time > calloutUntil || over)) calloutText.text = "";

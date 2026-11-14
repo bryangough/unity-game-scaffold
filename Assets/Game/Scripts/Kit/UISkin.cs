@@ -73,6 +73,9 @@ namespace GameScaffold
         public Color buttonText = Color.white;
         [Tooltip("Text on the main button.")]
         public Color buttonPrimaryText = Color.white;
+        [Tooltip("The result card's YOU WIN / YOU LOSE")]
+        public Color winColor = new Color(0.45f, 1f, 0.5f);
+        public Color loseColor = new Color(1f, 0.4f, 0.35f);
         [Tooltip("The dim over the game behind a screen.")]
         public Color dim = new Color(0.04f, 0.05f, 0.08f, 0.85f);
 

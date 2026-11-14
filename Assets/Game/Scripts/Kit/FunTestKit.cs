@@ -156,6 +156,13 @@ namespace GameScaffold
             Instance.timeLeft = Mathf.Max(0f, Instance.timeLeft + seconds);
         }
 
+        /// <summary>Shows or hides the countdown without stopping it (the Shell hides it outside play: the title, the
+        /// level select, the result card).</summary>
+        public static void ShowTimer(bool on)
+        {
+            if (Instance != null && Instance.timerText != null) Instance.timerText.enabled = on;
+        }
+
         public static void StopTimer()
         {
             if (Instance != null) Instance.timerRunning = false;

@@ -42,6 +42,8 @@ namespace GameScaffold.Editor
                     Rematch(c, w, h);
                 }
             Canvas.ForceUpdateCanvases();
+            foreach (BleedToScreen b in Object.FindObjectsByType<BleedToScreen>()) b.Refit(); // backdrops cover the new shape
+            Canvas.ForceUpdateCanvases();
             cam.targetTexture = rt;
             cam.Render();
             cam.targetTexture = prev;

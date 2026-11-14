@@ -232,8 +232,22 @@ namespace GameScaffold
         private void BuildHud(Transform root)
         {
             hud = ShellUI.Fill(root, "HUD").gameObject;
-            Button pause = ShellUI.MakeButton(hud.transform, "Button_Pause", "II", UISkin.Role.Plain, Vector2.one,
+            bool icon = skin != null && skin.pause != null;
+            Button pause = ShellUI.MakeButton(hud.transform, "Button_Pause", icon ? "" : "II", UISkin.Role.Plain, Vector2.one,
                 new Vector2(-62f, -62f), new Vector2(88f, 88f), () => Open(Pause), skin);
+            if (icon)
+            {
+                // the skin's pause sprite: a font's "II" can read as a Roman numeral
+                var go = new GameObject("Icon", typeof(RectTransform), typeof(Image));
+                var r = (RectTransform)go.transform;
+                r.SetParent(pause.transform, false);
+                r.anchorMin = r.anchorMax = r.pivot = new Vector2(0.5f, 0.5f);
+                r.sizeDelta = new Vector2(44f, 44f);
+                var img = go.GetComponent<Image>();
+                img.sprite = skin.pause;
+                img.color = skin.buttonText;
+                img.raycastTarget = false;
+            }
             pause.navigation = new Navigation { mode = Navigation.Mode.None }; // never takes the focus from the game
         }
 
@@ -401,6 +415,7 @@ namespace GameScaffold
             settingsPanel.SetActive(top == Settings);
             confirmPanel.SetActive(top == Confirm);
             hud.SetActive(playing && !FunTestKit.IsOver);
+            FunTestKit.ShowTimer(playing && !FunTestKit.IsOver); // the level clock belongs to play, not the menus
 
             FunTestKit.Hold = !playing; // the level clock waits under a menu
             Sfx.Ducked = !playing;
@@ -475,7 +490,7 @@ namespace GameScaffold
             bool hasNext = level < LevelCount - 1;
             resultCaption.text = Caption(level);
             resultTitle.text = won ? "YOU WIN" : "YOU LOSE";
-            resultTitle.color = won ? new Color(0.45f, 1f, 0.5f) : new Color(1f, 0.4f, 0.35f);
+            resultTitle.color = won ? (skin != null ? skin.winColor : new Color(0.45f, 1f, 0.5f)) : (skin != null ? skin.loseColor : new Color(1f, 0.4f, 0.35f));
             resultLine.text = line ?? "";
             foreach (TextMeshProUGUI s in starLabels)
             {

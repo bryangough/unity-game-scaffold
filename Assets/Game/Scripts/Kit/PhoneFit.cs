@@ -84,6 +84,9 @@ namespace GameScaffold
         private void OnEnable() => Fit();
         private void LateUpdate() => Fit();
 
+        /// <summary>Fits now (a capture that resizes the canvases calls it before rendering).</summary>
+        public void Refit() { root = null; Fit(); }
+
         private void Fit()
         {
             if (rect == null) rect = (RectTransform)transform;

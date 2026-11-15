@@ -13,6 +13,11 @@ they could be.
 - **The save is theirs.** `Progress` is PlayerPrefs; the owner's real wins sit in it. Bots and captures set
   `Progress.Suspended = true` and call `Progress.Reload()` when done; nothing clears the save without asking.
   Compare the save before and after a test that wins levels.
+- **Lock the save after Play starts, or with a kit that keeps the lock.** Every static is reset when Play mode
+  starts (no domain reload), and `Progress.Suspended` was one of them: a capture script that set it and then entered
+  Play mode ran unlocked, and its dev wins (a level "solved" in 4 s, a best overwritten) reached the owner's save
+  (Still Frame, 2026-11-15). The kit now keeps the lock in `SessionState` across that reset and clears it when Play
+  mode ends; with an older kit, set it in the `EnteredPlayMode` callback (as `InputBot.Begin` does).
 - **One Editor per project, and know which one you are in.** With several Editors open, MCP calls can land in
   either and then stick to the wrong one. Start a command with a guard on `Application.dataPath`, and prefer menu
   items over ad-hoc commands for anything that writes.

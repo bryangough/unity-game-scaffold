@@ -45,7 +45,8 @@ namespace GameScaffold.Editor
             // judges it by its own capture, not by these floors
             if (!(t is TextMeshProUGUI)) return 0;
             int n = 0;
-            bool onButton = t.GetComponentInParent<Button>() != null;
+            // a button's own label takes the button floor; other text on a button (a tile's stars or note) is body or caption
+            bool onButton = t.name == "Label" && t.GetComponentInParent<Button>() != null;
             float floor = onButton ? ButtonMin : t.fontSize < BodyMin ? CaptionMin : BodyMin;
             float size = t.enableAutoSizing ? t.fontSizeMin : t.fontSize;
             string name = $"{where}: {HierarchyPath(t.transform)}";

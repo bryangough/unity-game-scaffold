@@ -13,9 +13,24 @@ namespace GameScaffold
         string Title(int index);
     }
 
+    /// <summary>
+    /// A catalogue in chapters (optional): the level select shows one chapter per page, headed by its title, when a
+    /// chapter fits on a page. Levels run on across chapters (chapter c holds levels c × size to c × size + size − 1).
+    /// </summary>
+    public interface IChapterCatalog : ILevelCatalog
+    {
+        int ChapterSize { get; }
+        /// <summary>The page heading for a chapter ("REEL 1: FIRST LIGHT").</summary>
+        string ChapterTitle(int chapter);
+    }
+
     /// <summary>The level select's paging, plain C# and tested: which levels are on which page.</summary>
     public static class LevelPages
     {
+        /// <summary>Levels per page: a chapter when the catalogue has chapters that fit the grid, else the grid.</summary>
+        public static int PageSize(ILevelCatalog catalog, int perPage) =>
+            catalog is IChapterCatalog c && c.ChapterSize > 0 && c.ChapterSize <= perPage ? c.ChapterSize : perPage;
+
         public static int PageCount(int levels, int perPage) => levels <= 0 ? 1 : (levels + perPage - 1) / perPage;
 
         /// <summary>The page a level is on (the level select opens on the current level's page).</summary>

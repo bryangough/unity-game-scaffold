@@ -122,6 +122,19 @@ namespace GameScaffold.Editor
             steps.Add(() => { Check("Start on a pad opens the pause", Shell.Flow.Top == Shell.Pause); InputBot.ReleaseKeys(); });
             steps.Add(() => InputBot.PressControl("<Gamepad>/buttonEast"));
             steps.Add(() => { Check("B on a pad closes the pause", !Shell.Flow.HasOverlay); InputBot.ReleaseKeys(); });
+            if (Shell.HowToRows == null || Shell.HowToRows.Length == 0) return;
+            // the how-to card over the pause: BACK has the focus, Esc / B goes back to the pause, not into play
+            steps.Add(() => InputBot.PressControl("<Keyboard>/escape"));
+            steps.Add(() => { InputBot.ReleaseKeys(); Shell.Open(Shell.HowTo); });
+            steps.Add(() => { });
+            steps.Add(() => Check($"the how-to card focuses BACK for a key player (focused: {Focused()})", Shell.Flow.Top == Shell.HowTo && Focused() == "Button_Back"));
+            steps.Add(() => InputBot.PressControl("<Keyboard>/escape"));
+            steps.Add(() => { Check("Esc on the how-to card goes back to the pause", Shell.Flow.Top == Shell.Pause); InputBot.ReleaseKeys(); });
+            steps.Add(() => Shell.Open(Shell.HowTo));
+            steps.Add(() => InputBot.PressControl("<Gamepad>/buttonEast"));
+            steps.Add(() => { Check("B on the how-to card goes back to the pause", Shell.Flow.Top == Shell.Pause); InputBot.ReleaseKeys(); });
+            steps.Add(() => InputBot.PressControl("<Keyboard>/escape"));
+            steps.Add(() => { Check("Esc then closes the pause", !Shell.Flow.HasOverlay); InputBot.ReleaseKeys(); });
         }
 
         /// <summary>Records one result in the report (only failures are listed one by one, with the count at the end).</summary>

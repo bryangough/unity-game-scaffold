@@ -82,8 +82,38 @@ namespace GameScaffold
         public static bool NewPlayer { get; private set; }
         private static bool checkedLaunch;
 
-        /// <summary>While true (a replay bot, a capture), nothing is written to PlayerPrefs: a tool's wins never land in the save.</summary>
-        public static bool Suspended;
+        /// <summary>
+        /// While true (a replay bot, a capture), nothing is written to PlayerPrefs: a tool's wins never land in the save.
+        /// In the Editor it is kept in <c>SessionState</c>, so a tool that sets it and then enters Play mode keeps it:
+        /// the reset every static gets at Play start used to clear it, and a check's wins reached the owner's save
+        /// (Still Frame, 2026-11-15). The tool clears it when it is done.
+        /// </summary>
+        public static bool Suspended
+        {
+            get => suspended;
+            set
+            {
+                suspended = value;
+#if UNITY_EDITOR
+                UnityEditor.SessionState.SetBool(SuspendedKey, value);
+#endif
+            }
+        }
+        private static bool suspended;
+        private const string SuspendedKey = "Progress.Suspended";
+
+#if UNITY_EDITOR
+        /// <summary>The lock never outlives a Play session: a tool that stopped half way cannot leave the owner's own
+        /// play unsaved.</summary>
+        [UnityEditor.InitializeOnLoadMethod]
+        private static void ClearSuspendedAfterPlay()
+        {
+            UnityEditor.EditorApplication.playModeStateChanged += s =>
+            {
+                if (s == UnityEditor.PlayModeStateChange.EnteredEditMode) Suspended = false;
+            };
+        }
+#endif
 
         public void Save()
         {
@@ -110,7 +140,15 @@ namespace GameScaffold
         public static void Reload() => current = null;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void ResetStatics() { current = null; Suspended = false; checkedLaunch = false; NewPlayer = false; }
+        private static void ResetStatics()
+        {
+            current = null; checkedLaunch = false; NewPlayer = false;
+#if UNITY_EDITOR
+            suspended = UnityEditor.SessionState.GetBool(SuspendedKey, false); // survives entering Play mode
+#else
+            suspended = false;
+#endif
+        }
 
         public string ToJson() => JsonUtility.ToJson(data);
 

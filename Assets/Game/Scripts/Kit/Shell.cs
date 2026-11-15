@@ -29,7 +29,22 @@ namespace GameScaffold
         // screens
         public const string Title = "Title", Levels = "Levels", Play = "Play", Result = "Result";
         // overlays
-        public const string Pause = "Pause", Settings = "Settings", Confirm = "Confirm";
+        public const string Pause = "Pause", Settings = "Settings", Confirm = "Confirm", HowTo = "HowTo";
+
+        /// <summary>One rule on the how-to-play card: a picture and a line.</summary>
+        public struct HowToRow
+        {
+            public Sprite picture;
+            public string line;
+            public HowToRow(Sprite picture, string line) { this.picture = picture; this.line = line; }
+        }
+
+        /// <summary>
+        /// The game's how-to-play card, set in the game manager's Awake (before the shell builds): one picture and one
+        /// line per rule. With rows, PAUSE and SETTINGS each get a HOW TO PLAY button; BACK returns to where it was
+        /// opened. Null: no card, no button.
+        /// </summary>
+        public static HowToRow[] HowToRows;
 
         /// <summary>A landscape game: the reference canvas is wider than it is tall.</summary>
         public static bool Wide => PrototypeUIHelper.ReferenceResolution.x > PrototypeUIHelper.ReferenceResolution.y;
@@ -45,6 +60,9 @@ namespace GameScaffold
         public static AppFlow Flow { get; private set; }
         /// <summary>The game's levels; set in the game manager's Awake. Without one the shell treats the game as one level.</summary>
         public static ILevelCatalog Catalog;
+        /// <summary>A short note under a level's number on its tile (a best time, say); null or "" for none. The game
+        /// sets it with <see cref="Catalog"/>.</summary>
+        public static Func<int, string> TileNote;
         /// <summary>A check that presses every key (<c>InputCheck</c>) sets this so the menus do not react meanwhile.</summary>
         public static bool IgnoreInput;
 
@@ -62,7 +80,7 @@ namespace GameScaffold
         public UISkin skin;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void ResetStatics() { Instance = null; Flow = null; Catalog = null; IgnoreInput = false; resumeFrame = 0; Changed = null; }
+        private static void ResetStatics() { Instance = null; Flow = null; Catalog = null; TileNote = null; HowToRows = null; IgnoreInput = false; resumeFrame = 0; Changed = null; }
 
         // ---------------------------------------------------------------- the rules (plain, tested by ShellTests)
 
@@ -124,7 +142,7 @@ namespace GameScaffold
         public static void Go(string screen)
         {
             if (Instance == null) return;
-            if (screen == Levels) Instance.page = LevelPages.PageOf(CurrentLevel, PerPage);
+            if (screen == Levels) Instance.page = LevelPages.PageOf(CurrentLevel, PageSize);
             Flow.Enter(screen);
             Instance.Apply();
         }
@@ -134,10 +152,16 @@ namespace GameScaffold
 
         // ---------------------------------------------------------------- the screens
 
-        private GameObject hud, titleScreen, levelsScreen, resultScreen, pausePanel, settingsPanel, confirmPanel;
+        private GameObject hud, titleScreen, levelsScreen, resultScreen, pausePanel, settingsPanel, confirmPanel, howToPanel;
+        private Button howToBack;
+        private static bool HasHowTo => HowToRows != null && HowToRows.Length > 0;
         private CanvasGroup titleGroup, levelsGroup, resultGroup;
         private Button playButton, levelsButton, settingsButton, resumeButton, backButton, pagePrev, pageNext;
         private Button resultPrimary, resultRetry, resultLevels, musicButton, soundButton, hapticsButton, confirmNo;
+        private TextMeshProUGUI levelsHeading;
+        private readonly TextMeshProUGUI[] tileNotes = new TextMeshProUGUI[PerPage];
+        /// <summary>Levels per page of the level select (a chapter when the catalogue has them).</summary>
+        private static int PageSize => LevelPages.PageSize(Catalog, PerPage);
         private TextMeshProUGUI titleStars, pageLabel, resultCaption, resultTitle, resultLine, pauseCaption, confirmText;
         private readonly Button[] tiles = new Button[PerPage];
         private readonly Vector2[] tileHome = new Vector2[PerPage];
@@ -168,7 +192,7 @@ namespace GameScaffold
         private void Start()
         {
             FunTestKit.ShowRestart(false); // the pause has RESTART
-            page = LevelPages.PageOf(CurrentLevel, PerPage);
+            page = LevelPages.PageOf(CurrentLevel, PageSize);
             Apply();
         }
 
@@ -198,6 +222,7 @@ namespace GameScaffold
             BuildPause(root);
             BuildSettings(root);
             BuildConfirm(root);
+            BuildHowTo(root);
             SafeAreaPanel.Wrap(canvas); // buttons clear of a notch and the home bar; the dims bleed past it
         }
 
@@ -297,9 +322,13 @@ namespace GameScaffold
             levelsScreen = MakeScreen(root, "Screen_Levels", out levelsGroup);
             Transform t = levelsScreen.transform;
             bool wide = Wide; // landscape: a wider, shorter grid, and BACK between the page arrows
-            TextMeshProUGUI head = ShellUI.Label(t, "Text_Heading", "LEVELS", wide ? 48f : 56f, TitleCol, new Vector2(0.5f, 1f), new Vector2(0f, wide ? -62f : -110f), new Vector2(600f, wide ? 70f : 90f), skin);
+            TextMeshProUGUI head = ShellUI.Label(t, "Text_Heading", "LEVELS", wide ? 48f : 56f, TitleCol, new Vector2(0.5f, 1f), new Vector2(0f, wide ? -62f : -110f), new Vector2(640f, wide ? 70f : 90f), skin);
             head.fontStyle = FontStyles.Bold;
             if (skin != null) skin.Display(head);
+            head.enableAutoSizing = true; // a chapter's title runs longer than LEVELS
+            head.fontSizeMin = ShellUI.BodySize;
+            head.fontSizeMax = head.fontSize;
+            levelsHeading = head;
 
             float gridW = Columns * Tile + (Columns - 1) * Gap, gridH = Rows * Tile + (Rows - 1) * Gap;
             RectTransform grid = ShellUI.Box(t, "Grid", ShellUI.Centre, new Vector2(0f, wide ? 14f : 42f), new Vector2(gridW, gridH));
@@ -314,6 +343,7 @@ namespace GameScaffold
                 ShellUI.LabelOf(b).rectTransform.offsetMin = new Vector2(10f, 40f); // the number sits over the stars
                 if (skin != null) ShellUI.LabelOf(b).color = skin.levelText;
                 tileStars[i] = ShellUI.Label(face.transform, "Text_Stars", "", 30f, Color.white, new Vector2(0.5f, 0f), new Vector2(0f, 30f), new Vector2(Tile, 36f), skin);
+                tileNotes[i] = ShellUI.Label(face.transform, "Text_Note", "", ShellUI.CaptionSize, skin != null ? skin.levelText : Color.white, new Vector2(0.5f, 1f), new Vector2(0f, -28f), new Vector2(Tile - 30f, 30f), skin);
                 tiles[i] = b;
                 tileHome[i] = new Vector2(x, y);
             }
@@ -344,23 +374,29 @@ namespace GameScaffold
 
         private void BuildPause(Transform root)
         {
-            pausePanel = MakePanel(root, "Panel_Pause", new Vector2(520f, 640f), "PAUSED", out Transform card);
-            pauseCaption = ShellUI.Label(card, "Text_Level", "", 26f, SoftCol, ShellUI.Centre, new Vector2(0f, 192f), new Vector2(460f, 44f), skin);
-            resumeButton = Btn(card, "Button_Resume", "RESUME", UISkin.Role.Primary, new Vector2(0f, 96f), new Vector2(400f, 104f), Resume, 40f);
-            Btn(card, "Button_Restart", "RESTART", UISkin.Role.Plain, new Vector2(0f, -18f), new Vector2(400f, 92f), Retry);
-            Btn(card, "Button_Levels", "LEVELS", UISkin.Role.Plain, new Vector2(0f, -120f), new Vector2(400f, 92f), () => Go(Levels));
-            Btn(card, "Button_Settings", "SETTINGS", UISkin.Role.Plain, new Vector2(0f, -222f), new Vector2(400f, 92f), () => Open(Settings));
+            float dy = HasHowTo ? 51f : 0f; // a fifth row: the card is taller and everything moves up half a row
+            pausePanel = MakePanel(root, "Panel_Pause", new Vector2(520f, 640f + 2f * dy), "PAUSED", out Transform card);
+            pauseCaption = ShellUI.Label(card, "Text_Level", "", 26f, SoftCol, ShellUI.Centre, new Vector2(0f, 192f + dy), new Vector2(460f, 44f), skin);
+            resumeButton = Btn(card, "Button_Resume", "RESUME", UISkin.Role.Primary, new Vector2(0f, 96f + dy), new Vector2(400f, 104f), Resume, 40f);
+            Btn(card, "Button_Restart", "RESTART", UISkin.Role.Plain, new Vector2(0f, -18f + dy), new Vector2(400f, 92f), Retry);
+            Btn(card, "Button_Levels", "LEVELS", UISkin.Role.Plain, new Vector2(0f, -120f + dy), new Vector2(400f, 92f), () => Go(Levels));
+            Btn(card, "Button_Settings", "SETTINGS", UISkin.Role.Plain, new Vector2(0f, -222f + dy), new Vector2(400f, 92f), () => Open(Settings));
+            if (HasHowTo) Btn(card, "Button_HowTo", "HOW TO PLAY", UISkin.Role.Plain, new Vector2(0f, -324f + dy), new Vector2(400f, 92f), () => Open(HowTo));
         }
 
         private void BuildSettings(Transform root)
         {
             // portrait: one column; landscape: the three switches on the left, RESET, BACK and the credit on the right
             bool wide = Wide;
-            settingsPanel = MakePanel(root, "Panel_Settings", wide ? new Vector2(920f, 520f) : new Vector2(560f, 780f), "SETTINGS", out Transform card);
+            // with a how-to card, one more row: portrait grows by a row, landscape puts it under the switches
+            float grow = HasHowTo ? 100f : 0f, up = grow * 0.5f;
+            settingsPanel = MakePanel(root, "Panel_Settings", wide ? new Vector2(920f, 520f + grow) : new Vector2(560f, 780f + grow), "SETTINGS", out Transform card);
             Vector2 size = wide ? new Vector2(400f, 88f) : new Vector2(440f, 88f);
             Vector2[] at = wide
-                ? new[] { new Vector2(-220f, 90f), new Vector2(-220f, -10f), new Vector2(-220f, -110f), new Vector2(220f, 90f), new Vector2(220f, -10f), new Vector2(220f, -112f) }
-                : new[] { new Vector2(0f, 210f), new Vector2(0f, 110f), new Vector2(0f, 10f), new Vector2(0f, -110f), new Vector2(0f, -220f), new Vector2(0f, -326f) };
+                ? new[] { new Vector2(-220f, 90f + up), new Vector2(-220f, -10f + up), new Vector2(-220f, -110f + up), new Vector2(220f, 90f + up), new Vector2(220f, -10f + up), new Vector2(220f, -112f + up), new Vector2(-220f, -210f + up) }
+                : new[] { new Vector2(0f, 210f + up), new Vector2(0f, 110f + up), new Vector2(0f, 10f + up), new Vector2(0f, -210f + up), new Vector2(0f, -320f + up), new Vector2(0f, -426f + up), new Vector2(0f, -100f + up) };
+            if (!HasHowTo && !wide) { at[3] = new Vector2(0f, -110f); at[4] = new Vector2(0f, -220f); at[5] = new Vector2(0f, -326f); }
+            if (HasHowTo) Btn(card, "Button_HowTo", "HOW TO PLAY", UISkin.Role.Plain, at[6], size, () => Open(HowTo));
             musicButton = Btn(card, "Button_Music", "", UISkin.Role.Plain, at[0], size, () => { Progress.Current.Music = !Progress.Current.Music; FillSettings(); });
             soundButton = Btn(card, "Button_Sound", "", UISkin.Role.Plain, at[1], size, () => { Progress.Current.Sound = !Progress.Current.Sound; FillSettings(); });
             hapticsButton = Btn(card, "Button_Vibration", "", UISkin.Role.Plain, at[2], size, () =>
@@ -400,6 +436,35 @@ namespace GameScaffold
             confirmNo = Btn(card, "Button_No", "NO", UISkin.Role.Plain, new Vector2(125f, -110f), new Vector2(210f, 96f), Resume);
         }
 
+        /// <summary>The how-to-play card: a picture and a line per rule, BACK under them.</summary>
+        private void BuildHowTo(Transform root)
+        {
+            if (!HasHowTo) return;
+            const float rowH = 132f;
+            int n = HowToRows.Length;
+            float h = 200f + n * rowH;
+            howToPanel = MakePanel(root, "Panel_HowTo", new Vector2(660f, h), "HOW TO PLAY", out Transform card);
+            float top = h * 0.5f - 150f;
+            for (int i = 0; i < n; i++)
+            {
+                float y = top - i * rowH;
+                if (HowToRows[i].picture != null)
+                {
+                    RectTransform pr = ShellUI.Box(card, "Picture_" + i, ShellUI.Centre, new Vector2(-240f, y), new Vector2(108f, 108f));
+                    var img = pr.gameObject.AddComponent<Image>();
+                    img.sprite = HowToRows[i].picture;
+                    img.preserveAspect = true;
+                    img.raycastTarget = false;
+                }
+                TextMeshProUGUI t = ShellUI.Label(card, "Text_Rule_" + i, HowToRows[i].line, ShellUI.BodySize, TextCol, ShellUI.Centre, new Vector2(64f, y), new Vector2(464f, rowH - 8f), skin);
+                t.alignment = TextAlignmentOptions.MidlineLeft;
+                t.enableAutoSizing = true;
+                t.fontSizeMin = ShellUI.BodySize; // read mid-game: never under the body floor
+                t.fontSizeMax = t.fontSize;
+            }
+            howToBack = Btn(card, "Button_Back", "BACK", UISkin.Role.Plain, new Vector2(0f, -h * 0.5f + 70f), new Vector2(400f, 88f), Resume);
+        }
+
         // ---------------------------------------------------------------- showing them
 
         /// <summary>Shows what <see cref="Flow"/> says: the screen, the top overlay, the pause button, the focus.</summary>
@@ -417,6 +482,7 @@ namespace GameScaffold
             pausePanel.SetActive(top == Pause);
             settingsPanel.SetActive(top == Settings);
             confirmPanel.SetActive(top == Confirm);
+            if (howToPanel != null) howToPanel.SetActive(top == HowTo);
             hud.SetActive(playing && !FunTestKit.IsOver);
             FunTestKit.ShowTimer(playing && !FunTestKit.IsOver); // the level clock belongs to play, not the menus
 
@@ -445,8 +511,10 @@ namespace GameScaffold
         private void FillLevels()
         {
             int n = LevelCount;
-            page = LevelPages.Clamp(page, n, PerPage);
-            (int first, int count) = LevelPages.Range(page, n, PerPage);
+            int size = PageSize;
+            page = LevelPages.Clamp(page, n, size);
+            (int first, int count) = LevelPages.Range(page, n, size);
+            levelsHeading.text = Catalog is IChapterCatalog chapters && size == chapters.ChapterSize ? chapters.ChapterTitle(page) : "LEVELS";
             Progress p = Progress.Current;
             float shift = count < Columns ? (Columns - count) * (Tile + Gap) * 0.5f : 0f; // a short single row sits in the middle
             for (int i = 0; i < PerPage; i++)
@@ -460,10 +528,11 @@ namespace GameScaffold
                 bool open = p.IsUnlocked(level);
                 ShellUI.SetLabel(tiles[i], (level + 1).ToString());
                 tileStars[i].text = r.solved ? UIText.Stars(Progress.Count(r.stars), 3, StarCol, 0.8f) : "";
+                tileNotes[i].text = TileNote != null ? TileNote(level) ?? "" : "";
                 tiles[i].interactable = open;
                 ShellUI.Face(tiles[i]).color = TileColour(open, level == CurrentLevel, r.solved);
             }
-            int pages = LevelPages.PageCount(n, PerPage);
+            int pages = LevelPages.PageCount(n, size);
             pagePrev.gameObject.SetActive(pages > 1);
             pageNext.gameObject.SetActive(pages > 1);
             pageLabel.gameObject.SetActive(pages > 1);
@@ -572,12 +641,13 @@ namespace GameScaffold
                 if (top == Confirm) want = confirmNo.gameObject;
                 else if (top == Settings) want = musicButton.gameObject;
                 else if (top == Pause) want = resumeButton.gameObject;
+                else if (top == HowTo && howToBack != null) want = howToBack.gameObject;
                 else if (top != null) return; // a game's own overlay looks after its focus
                 else if (state == Title) want = playButton.gameObject;
                 else if (state == Result) want = resultPrimary.gameObject;
                 else if (state == Levels)
                 {
-                    int slot = CurrentLevel - page * PerPage;
+                    int slot = CurrentLevel - page * PageSize;
                     want = slot >= 0 && slot < PerPage && tiles[slot].gameObject.activeSelf && tiles[slot].interactable ? tiles[slot].gameObject : backButton.gameObject;
                 }
             }
@@ -631,7 +701,7 @@ namespace GameScaffold
             if (action == BackAction.None) return;
             if (action == BackAction.GoTo)
             {
-                if (target == Levels) page = LevelPages.PageOf(CurrentLevel, PerPage);
+                if (target == Levels) page = LevelPages.PageOf(CurrentLevel, PageSize);
                 Flow.Enter(target);
             }
             else if (action == BackAction.OpenOverlay && target == Confirm)
@@ -666,11 +736,11 @@ namespace GameScaffold
             else OpenLevel(target);
         }
 
-        private void PickTile(int slot) => OpenLevel(page * PerPage + slot);
+        private void PickTile(int slot) => OpenLevel(page * PageSize + slot);
 
         private void TurnPage(int by)
         {
-            int to = LevelPages.Clamp(page + by, LevelCount, PerPage);
+            int to = LevelPages.Clamp(page + by, LevelCount, PageSize);
             if (to == page) return;
             page = to;
             Apply();

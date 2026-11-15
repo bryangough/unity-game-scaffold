@@ -97,6 +97,34 @@ namespace GameScaffold.Tests
             Assert.AreEqual(2, LevelPages.PageOf(44, 20));
         }
     }
+    /// <summary>A catalogue in chapters pages by chapter when a chapter fits the grid.</summary>
+    public class ChapterPagingTests
+    {
+        private sealed class Chapters : IChapterCatalog
+        {
+            public int size;
+            public int Count => 30;
+            public string Title(int index) => "";
+            public int ChapterSize => size;
+            public string ChapterTitle(int chapter) => "C" + chapter;
+        }
+
+        private sealed class Plain : ILevelCatalog
+        {
+            public int Count => 30;
+            public string Title(int index) => "";
+        }
+
+        [Test]
+        public void PageSize_IsAChapterWhenItFits_ElseTheGrid()
+        {
+            Assert.AreEqual(10, LevelPages.PageSize(new Chapters { size = 10 }, 20));
+            Assert.AreEqual(20, LevelPages.PageSize(new Chapters { size = 25 }, 20), "a chapter too big for the grid pages by grid");
+            Assert.AreEqual(20, LevelPages.PageSize(new Plain(), 20));
+            Assert.AreEqual(20, LevelPages.PageSize(null, 20));
+        }
+    }
+
     /// <summary>A skin's font scale shrinks labels, never past the readability floors (TASKS 4.9).</summary>
     public class LabelFloorTests
     {

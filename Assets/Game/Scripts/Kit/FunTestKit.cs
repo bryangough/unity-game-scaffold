@@ -346,7 +346,7 @@ namespace GameScaffold
             // the callout fits its box under the HUD row: it shrinks rather than spill
             Stretch(calloutText.rectTransform, new Vector2(0.04f, 0.66f), new Vector2(0.96f, 0.915f));
             calloutText.enableAutoSizing = true;
-            calloutText.fontSizeMin = 23f;
+            calloutText.fontSizeMin = 28f; // the body floor: a callout is read mid-play
             calloutText.fontSizeMax = 40f;
             calloutText.color = new Color(1f, 0.92f, 0.3f);
             UIText.Outline(calloutText, 0.12f);

@@ -97,4 +97,18 @@ namespace GameScaffold.Tests
             Assert.AreEqual(2, LevelPages.PageOf(44, 20));
         }
     }
+    /// <summary>A skin's font scale shrinks labels, never past the readability floors (TASKS 4.9).</summary>
+    public class LabelFloorTests
+    {
+        [Test]
+        public void Scaled_KeepsBodyAndCaptionFloors()
+        {
+            var skin = UnityEngine.ScriptableObject.CreateInstance<UISkin>();
+            skin.fontScale = 0.8f;
+            Assert.AreEqual(ShellUI.BodySize, ShellUI.Scaled(ShellUI.BodySize, skin), 1e-4f, "body stays at the body floor");
+            Assert.AreEqual(ShellUI.CaptionSize, ShellUI.Scaled(ShellUI.CaptionSize, skin), 1e-4f, "a caption stays at the caption floor");
+            Assert.AreEqual(56f * 0.8f, ShellUI.Scaled(56f, skin), 1e-4f, "big text scales freely above the floor");
+            UnityEngine.Object.DestroyImmediate(skin);
+        }
+    }
 }

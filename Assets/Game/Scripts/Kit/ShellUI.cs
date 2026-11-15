@@ -71,10 +71,23 @@ namespace GameScaffold
             return img;
         }
 
+        /// <summary>
+        /// A label size in the skin's <see cref="UISkin.fontScale"/>, never under the readability floor the size was
+        /// asked at (a body size stays at least <see cref="BodySize"/>, a caption at least <see cref="CaptionSize"/>):
+        /// a wide font scales down, but not past what a phone can read.
+        /// </summary>
+        public static float Scaled(float size, UISkin skin)
+        {
+            float s = size * (skin != null ? skin.fontScale : 1f);
+            if (size >= BodySize) return Mathf.Max(s, BodySize);
+            if (size >= CaptionSize) return Mathf.Max(s, CaptionSize);
+            return s;
+        }
+
         public static TextMeshProUGUI Label(Transform parent, string name, string text, float size, Color color,
             Vector2 anchor, Vector2 position, Vector2 box, UISkin skin = null)
         {
-            TextMeshProUGUI t = UIText.Make(parent, name, size * (skin != null ? skin.fontScale : 1f), color);
+            TextMeshProUGUI t = UIText.Make(parent, name, Scaled(size, skin), color);
             RectTransform r = t.rectTransform;
             r.anchorMin = r.anchorMax = anchor;
             r.pivot = Centre;
@@ -117,8 +130,10 @@ namespace GameScaffold
             t.fontStyle = FontStyles.Bold;
             t.text = label;
             t.enableAutoSizing = true;
-            t.fontSizeMax = labelSize * scale;
-            t.fontSizeMin = Mathf.Min(ButtonLabelMin, labelSize) * scale;
+            // the label shrinks to fit, in the skin's scale, but never under the button floor
+            t.fontSizeMin = Mathf.Min(ButtonLabelMin, labelSize);
+            t.fontSizeMax = Mathf.Max(labelSize * scale, t.fontSizeMin);
+            t.fontSize = t.fontSizeMax;
             RectTransform tr = t.rectTransform;
             tr.anchorMin = Vector2.zero; tr.anchorMax = Vector2.one;
             tr.offsetMin = new Vector2(10f, 4f); tr.offsetMax = new Vector2(-10f, -4f);

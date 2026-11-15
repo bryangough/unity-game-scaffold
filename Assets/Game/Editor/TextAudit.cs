@@ -41,6 +41,9 @@ namespace GameScaffold.Editor
 
         private static int Check(TMP_Text t, string where, StringBuilder sb)
         {
+            // world-space text (TextMeshPro, not TextMeshProUGUI) is sized in world units, not canvas pixels: a game
+            // judges it by its own capture, not by these floors
+            if (!(t is TextMeshProUGUI)) return 0;
             int n = 0;
             bool onButton = t.GetComponentInParent<Button>() != null;
             float floor = onButton ? ButtonMin : t.fontSize < BodyMin ? CaptionMin : BodyMin;

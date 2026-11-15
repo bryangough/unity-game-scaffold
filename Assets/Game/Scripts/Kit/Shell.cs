@@ -335,7 +335,7 @@ namespace GameScaffold
                 starLabels[i] = ShellUI.Label(card, "Star_" + i, UIText.StarOff, 88f, Color.white, ShellUI.Centre, new Vector2((i - 1) * 120f, 96f), new Vector2(120f, 110f), skin);
             resultLine = ShellUI.Label(card, "Text_Line", "", ShellUI.BodySize, TextCol, ShellUI.Centre, new Vector2(0f, -8f), new Vector2(520f, 96f), skin);
             resultLine.enableAutoSizing = true;
-            resultLine.fontSizeMin = 24f;
+            resultLine.fontSizeMin = ShellUI.BodySize; // the run in numbers: read at arm's length too
             resultLine.fontSizeMax = ShellUI.BodySize;
             resultPrimary = Btn(card, "Button_Primary", "NEXT", UISkin.Role.Primary, new Vector2(0f, -122f), new Vector2(440f, 108f), () => resultAction?.Invoke(), 42f);
             resultRetry = Btn(card, "Button_Retry", "RETRY", UISkin.Role.Plain, new Vector2(-115f, -244f), new Vector2(210f, 92f), Retry);

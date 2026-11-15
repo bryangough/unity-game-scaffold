@@ -46,6 +46,19 @@ namespace GameScaffold
         /// </summary>
         public static HowToRow[] HowToRows;
 
+        /// <summary>
+        /// One more button on the start screen, under SETTINGS (a game's collection, say): its label and what it does
+        /// (usually <see cref="Open"/> on the game's own overlay). Set in the game manager's Awake; null for none.
+        /// </summary>
+        public static TitleButton TitleExtra;
+
+        public sealed class TitleButton
+        {
+            public readonly string Label;
+            public readonly Action OnClick;
+            public TitleButton(string label, Action onClick) { Label = label; OnClick = onClick; }
+        }
+
         /// <summary>A landscape game: the reference canvas is wider than it is tall.</summary>
         public static bool Wide => PrototypeUIHelper.ReferenceResolution.x > PrototypeUIHelper.ReferenceResolution.y;
         /// <summary>The level select's grid: 4 x 5 in portrait, 7 x 3 in landscape.</summary>
@@ -80,7 +93,7 @@ namespace GameScaffold
         public UISkin skin;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void ResetStatics() { Instance = null; Flow = null; Catalog = null; TileNote = null; HowToRows = null; IgnoreInput = false; resumeFrame = 0; Changed = null; }
+        private static void ResetStatics() { Instance = null; Flow = null; Catalog = null; TileNote = null; HowToRows = null; TitleExtra = null; IgnoreInput = false; resumeFrame = 0; Changed = null; }
 
         // ---------------------------------------------------------------- the rules (plain, tested by ShellTests)
 
@@ -305,6 +318,11 @@ namespace GameScaffold
             playButton = Btn(t, "Button_Play", "PLAY", UISkin.Role.Primary, wide ? new Vector2(0f, -4f) : new Vector2(0f, 20f), wide ? new Vector2(420f, 112f) : new Vector2(420f, 120f), PlayNext, 48f);
             levelsButton = Btn(t, "Button_Levels", "LEVELS", UISkin.Role.Plain, wide ? new Vector2(-215f, -136f) : new Vector2(0f, -130f), wide ? new Vector2(400f, 92f) : new Vector2(420f, 96f), () => Go(Levels));
             settingsButton = Btn(t, "Button_Settings", "SETTINGS", UISkin.Role.Plain, wide ? new Vector2(215f, -136f) : new Vector2(0f, -246f), wide ? new Vector2(400f, 92f) : new Vector2(420f, 96f), () => Open(Settings));
+            if (TitleExtra != null)
+            {
+                TitleButton extra = TitleExtra;
+                Btn(t, "Button_Extra", extra.Label, UISkin.Role.Plain, wide ? new Vector2(0f, -244f) : new Vector2(0f, -362f), wide ? new Vector2(400f, 92f) : new Vector2(420f, 96f), () => extra.OnClick?.Invoke());
+            }
 
             // the credit and version line: seven quick taps unlock the dev menu on a release build
             RectTransform vr = ShellUI.Box(t, "Button_Version", new Vector2(0.5f, 0f), new Vector2(0f, 56f), new Vector2(640f, 64f));

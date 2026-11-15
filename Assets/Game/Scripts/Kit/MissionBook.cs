@@ -12,11 +12,13 @@ namespace GameScaffold
         void DeleteKey(string key);
     }
 
+    /// <summary>PlayerPrefs, and nothing written while <see cref="Progress.Suspended"/> (a bot's runs never reach the
+    /// owner's missions; Still Frame, 2026-11-15).</summary>
     public class PrefsMissionStore : IMissionStore
     {
         public int GetInt(string key, int fallback) => PlayerPrefs.GetInt(key, fallback);
-        public void SetInt(string key, int value) { PlayerPrefs.SetInt(key, value); PlayerPrefs.Save(); }
-        public void DeleteKey(string key) { PlayerPrefs.DeleteKey(key); PlayerPrefs.Save(); }
+        public void SetInt(string key, int value) { if (Progress.Suspended) return; PlayerPrefs.SetInt(key, value); PlayerPrefs.Save(); }
+        public void DeleteKey(string key) { if (Progress.Suspended) return; PlayerPrefs.DeleteKey(key); PlayerPrefs.Save(); }
     }
 
     /// <summary>

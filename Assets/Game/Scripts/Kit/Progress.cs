@@ -104,13 +104,17 @@ namespace GameScaffold
 
 #if UNITY_EDITOR
         /// <summary>The lock never outlives a Play session: a tool that stopped half way cannot leave the owner's own
-        /// play unsaved.</summary>
+        /// play unsaved. And what the locked session changed in memory is dropped with it: the copy is read from disk
+        /// again, or the next save in edit mode (a test, a menu) would write a bot's state into the owner's save
+        /// (Still Frame, 2026-11-15: an Unlock Everything and two choices leaked that way).</summary>
         [UnityEditor.InitializeOnLoadMethod]
         private static void ClearSuspendedAfterPlay()
         {
             UnityEditor.EditorApplication.playModeStateChanged += s =>
             {
-                if (s == UnityEditor.PlayModeStateChange.EnteredEditMode) Suspended = false;
+                if (s != UnityEditor.PlayModeStateChange.EnteredEditMode) return;
+                Suspended = false;
+                Reload(); // always: real play saved as it went, so disk is the truth; a tool's state is not
             };
         }
 #endif

@@ -30,7 +30,7 @@ Owner: __OWNER__ · Executor: AI Assistant · Updated: __DATE__ (made from the s
 - A new rule is taught by its first level, never by a paragraph.
 - A loss is always the player's fault, and they can see why.
 - Nothing to sign in to; the game always plays offline. No ads and nothing collected by default (a slot is kept,
-  5.12; the decision is 6.4).
+  4.12; the decision is 6.4).
 - Extras (stars, unlocks, settings) never sit between the player and the next level.
 
 ---
@@ -55,13 +55,16 @@ Owner: __OWNER__ · Executor: AI Assistant · Updated: __DATE__ (made from the s
 | Milestone | Status | Open ids | __OWNER__'s check |
 |---|---|---|---|
 | **M1 — Ten levels prove the base** | — | 0.x, 1.x | Plays ten levels and says "we have a game". |
-| **M2 — In a hand** | — | 2.x | Ten inputs on a phone without one going wrong; everything reads at arm's length. |
-| **M3 — A game around the levels** | — | 5.1–5.7 | A new player gets from the icon to level 3 with nobody explaining anything. |
-| **M4 — A look and a sound** | — | 4.x | Nothing on screen is a grey box; the sounds approved by ear; the phone frame holds. |
-| **M5 — Forty+ levels** | — | 3.x, 5.2x | Play 1 → N; each chapter teaches its twist in its first level without text. |
+| **M2 — A game around the levels** | — | 4.1–4.7 | A new player gets from pressing Play to level 3 with nobody explaining anything. |
+| **M3 — A look and a sound** | — | 3.x | Nothing on screen is a grey box; the sounds approved by ear; every screen holds at the phone shapes in the Game view. |
+| **M4 — Forty+ levels** | — | 2.x, 4.2x | Play 1 → N; each chapter teaches its twist in its first level without text. |
+| **M5 — In a hand** | — | 5.x | The first builds. Ten inputs on a phone without one going wrong; everything reads at arm's length; the frame rate holds with the art in. |
 | **M6 — Released** | — | 6.x, 7.x | Live on itch.io, Play internal testing and TestFlight; three friends finish ten levels unaided. |
 
 ---
+
+No build is made before M5: until then the game is played and judged in the Editor (the Game view at the phone
+shapes, `Checks >` captures, the text audit), so nothing waits on a device or a build module.
 
 ## Phase 0 — Own the code
 
@@ -97,24 +100,7 @@ Owner: __OWNER__ · Executor: AI Assistant · Updated: __DATE__ (made from the s
 - [ ] **1.6 Teaching without text.** Level 1 shows the verb (a ghost hand, a lit target); one-line hints at the
   moments they explain, each shown once ever (`Progress.FirstTime`).
 
-## Phase 2 — Phone and web builds
-
-*Done:* —
-
-- [ ] **2.1 Builds from the menu.** `Build > WebGL / Android / iOS`; the web download logged against the budget;
-  `Builds/Checks/size_*.md` written. *Try:* `Serve Web Build on the LAN`, open it on a phone.
-- [ ] **2.2 Web budget.** Under ~10 MB download: `WebSize` caps, crunch for flat art, Brotli, wasm for size; music
-  streamed (`MusicBundles`), never in the first download. Smaller web music needs an MP3 encoder (ffmpeg on PATH or
-  `pip install soundfile`, see `tools/web_music.py`); without one the build still works and packs bigger clips, with a
-  warning in the log: install one here if the size report says the music is what is over budget.
-- [ ] **2.3 Phone fit.** 60 fps, safe area, keep-awake, pause in the background (`PhoneFit`); haptics on the moments
-  (`Haptics`), off with the setting. *Try (__OWNER__):* ten inputs on the phone without one going wrong.
-- [ ] **2.4 Phone test (__OWNER__).** The FPS (`DevFps` in a dev build), swipes that went the wrong way, whether
-  locking the phone pauses, the thumb reach of every button.
-- [ ] **2.5 Frame budget.** Draw calls and frame time on the phone with the art in: batching, texture caps, render
-  scale as the first knob, light count. Use the dev builds.
-
-## Phase 3 — Rules (one per chapter of ten levels)
+## Phase 2 — Rules (one per chapter of ten levels)
 
 *Done:* —
 
@@ -122,61 +108,82 @@ Owner: __OWNER__ · Executor: AI Assistant · Updated: __DATE__ (made from the s
 > for the player. Each rule gets: the rule in the rules class + tests, a view, a check column ("without X: cannot
 > win"), ten levels (a teaching level first, a breather mid-way, a finale last), a sound, a how-to card.
 
-- [ ] **3.1** …
-- [ ] **3.2** …
+- [ ] **2.1** …
+- [ ] **2.2** …
 
-## Phase 4 — Look and sound
+## Phase 3 — Look and sound
 
 *Done:* —
 
-- [ ] **4.1 The art pick (__OWNER__).** From the shelf, by screenshot, before anything is imported. Only the subset a
+- [ ] **3.1 The art pick (__OWNER__).** From the shelf, by screenshot, before anything is imported. Only the subset a
   builder uses is copied in; the licence written in `Store/licences.md`; the repo private while a bought pack is in it.
-- [ ] **4.2 Theme as data.** A `Theme` asset per chapter (models, tints, lights) dressed over the primitives by a
+- [ ] **3.2 Theme as data.** A `Theme` asset per chapter (models, tints, lights) dressed over the primitives by a
   builder step; a level never references a model. The primitives stay underneath (views, rules and checks hang on them).
-- [ ] **4.3 Sound effects (__OWNER__ approves by ear).** Ids in `Sfx.Id`, picks in `SoundPicks` (two to four variants
+- [ ] **3.3 Sound effects (__OWNER__ approves by ear).** Ids in `Sfx.Id`, picks in `SoundPicks` (two to four variants
   each, from the library outside the project), `Import Sound Picks`, the report. Strike the variants that grate.
-- [ ] **4.4 Music.** Two stems per track (calm, full) crossfaded by intensity, ducked in menus, streamed from bundles
-  (on the web as small MP3s if an encoder is installed: 2.2);
+- [ ] **3.4 Music.** Two stems per track (calm, full) crossfaded by intensity, ducked in menus, streamed from bundles
+  (on the web as small MP3s if an encoder is installed: 5.2);
   one track per chapter. __OWNER__ shortlists by ear.
-- [ ] **4.5 UI skin.** A `UISkin` asset built from the UI pack by an editor script (a few sprites and one font, never
+- [ ] **3.5 UI skin.** A `UISkin` asset built from the UI pack by an editor script (a few sprites and one font, never
   the pack copied in); flat boxes until then.
-- [ ] **4.6 Colour-blind check.** `Checks > Colour Check`; the colours a player must tell apart in static fields, every
+- [ ] **3.6 Colour-blind check.** `Checks > Colour Check`; the colours a player must tell apart in static fields, every
   pair checked by `ColourCheck.ClosePairs` in a test (`ColourBlindTests`).
-- [ ] **4.7 Icon and title logo** (6.2 feeds the store); the start screen. Generated images go through `Art > Cut Out
+- [ ] **3.7 Icon and title logo** (6.2 feeds the store); the start screen. Generated images go through `Art > Cut Out
   Generated Art`; the prompts live in `art_prompts.md`.
-- [ ] **4.8 Readability pass.** `Checks > Text Fit Audit` clean at the floors (body ≥ 28, captions ≥ 23, button labels
+- [ ] **3.8 Readability pass.** `Checks > Text Fit Audit` clean at the floors (body ≥ 28, captions ≥ 23, button labels
   ≥ 30 on the 720 canvas; the duel game's phone test set them); judged on the 9:20 and 3:4 captures.
 
-## Phase 5 — The game around the levels
+## Phase 4 — The game around the levels
 
 *Done:* —
 
-- [ ] **5.1 Into the shell.** The start screen (PLAY to the next unsolved; a new player skips it), the level select
+- [ ] **4.1 Into the shell.** The start screen (PLAY to the next unsolved; a new player skips it), the level select
   with stars, the result card (stars landing, NEXT / RETRY / LEVELS), the pause and the settings (music, sound,
   vibration, reset) come with the kit (`Shell`): the manager sets `Shell.Catalog`, builds `Shell.CurrentLevel`,
   ticks only while `Shell.Playing`, ends a level with `Shell.ShowResult` and opens one with `Shell.OpenLevel`. What
-  the stars mean is the game's (`Progress.RecordWin`). *Try:* from the icon to level 3 and back to the level list
+  the stars mean is the game's (`Progress.RecordWin`). *Try:* from pressing Play to level 3 and back to the level list
   without a word of explanation; then again on the keyboard only.
-- [ ] **5.2 The game's own screens**, made from `ShellUI` and pushed on `Shell.Flow` as overlays: chapters on the
-  level select if there are any, the best on the result card. **5.6 How To Play** (one picture and one line per
-  rule, captured from the real game; a row in the settings). **5.7 Hints** (after N failures, a ghost that plays the
+- [ ] **4.2 The game's own screens**, made from `ShellUI` and pushed on `Shell.Flow` as overlays: chapters on the
+  level select if there are any, the best on the result card. **4.6 How To Play** (one picture and one line per
+  rule, captured from the real game; a row in the settings). **4.7 Hints** (after N failures, a ghost that plays the
   solution; using it costs the mastery star).
-- [ ] **5.8 Keys and a pad on the game's own screens** (the shell's already work: a focused button, arrows, Enter /
+- [ ] **4.8 Keys and a pad on the game's own screens** (the shell's already work: a focused button, arrows, Enter /
   Space, Esc; `InputMode` shows prompts only to key and pad players). Add the game's steps to `InputCheck.MenuSteps`.
-- [ ] **5.9 Story words.** A line per level and a card per chapter, in a doc first, then in the data; the text stays
+- [ ] **4.9 Story words.** A line per level and a card per chapter, in a doc first, then in the data; the text stays
   up until the player moves.
-- [ ] **5.10 Unlocks** (skins, backdrops, music) behind a lifetime count (`UnlockTable`: stars or missions, the first of
+- [ ] **4.10 Unlocks** (skins, backdrops, music) behind a lifetime count (`UnlockTable`: stars or missions, the first of
   each kind free), a "new" dot on the collection button; never between the player and the next level.
-- [ ] **5.11 Ending and credits** ("A game by …", a link through `ExternalLink`).
-- [ ] **5.12 The ads / data slot** (`GameServices`): the calls at the moments, the do-nothing default; decision at 6.4.
-- [ ] **5.13 Replay bot.** Every level's stored plan played through the real game (`Checks > Replay Levels`; the
+- [ ] **4.11 Ending and credits** ("A game by …", a link through `ExternalLink`).
+- [ ] **4.12 The ads / data slot** (`GameServices`): the calls at the moments, the do-nothing default; decision at 6.4.
+- [ ] **4.13 Replay bot.** Every level's stored plan played through the real game (`Checks > Replay Levels`; the
   driver is the kit's `ReplayBot`, the game registers `LevelReplay.Game` with how one beat of a plan is pressed
   through `InputBot`, and pins one tick a frame); `Builds/Checks/replay.md`; run before every build.
-- [ ] **5.14 Missions** (`MissionBook`): three up at a time from a pool the game defines over its run report, each done a
+- [ ] **4.14 Missions** (`MissionBook`): three up at a time from a pool the game defines over its run report, each done a
   star, one skip a day; a card on the start screen, never between the player and the next level.
-- [ ] **5.15 Back and the dev menu.** Every screen's Back rule in `AppFlow` (Android Back, Esc, B) with a quit confirm
+- [ ] **4.15 Back and the dev menu.** Every screen's Back rule in `AppFlow` (Android Back, Esc, B) with a quit confirm
   on the title; the game's own buttons in `DevMenu` (jump to a level, win now, currency), the version line's seven
   taps unlocking it on a release build.
+
+## Phase 5 — Phone and web builds
+
+*Done:* —
+
+> The first builds are made here, once the levels, the screens, the look and the sound are in: the size report and
+> the frame numbers are then the shipped game's, and the phone test is of the game a player will get. Earlier phases
+> never need one. Run the level check and the replay (4.13) before each build.
+
+- [ ] **5.1 Builds from the menu.** `Build > WebGL / Android / iOS`; the web download logged against the budget;
+  `Builds/Checks/size_*.md` written. *Try:* `Serve Web Build on the LAN`, open it on a phone.
+- [ ] **5.2 Web budget.** Under ~10 MB download: `WebSize` caps, crunch for flat art, Brotli, wasm for size; music
+  streamed (`MusicBundles`), never in the first download. Smaller web music needs an MP3 encoder (ffmpeg on PATH or
+  `pip install soundfile`, see `tools/web_music.py`); without one the build still works and packs bigger clips, with a
+  warning in the log: install one here if the size report says the music is what is over budget.
+- [ ] **5.3 Phone fit.** 60 fps, safe area, keep-awake, pause in the background (`PhoneFit`); haptics on the moments
+  (`Haptics`), off with the setting. *Try (__OWNER__):* ten inputs on the phone without one going wrong.
+- [ ] **5.4 Phone test (__OWNER__).** The FPS (`DevFps` in a dev build), swipes that went the wrong way, whether
+  locking the phone pauses, the thumb reach of every button.
+- [ ] **5.5 Frame budget.** Draw calls and frame time on the phone with the art in: batching, texture caps, render
+  scale as the first knob, light count. Use the dev builds.
 
 ## Phase 6 — Store and release
 
@@ -222,7 +229,7 @@ Owner: __OWNER__ · Executor: AI Assistant · Updated: __DATE__ (made from the s
 | **Input** | Input System only from day one. Touch first. |
 | **Twists** | Base rules for levels 1–10, then roughly one new rule per ten levels, never a new verb. |
 | **Levels are hand-made** | Authored and checked; a generator waits until there is a reason for endless levels. |
-| **Ads and data: a slot, left empty** | Built free, offline, nothing collected; one seam (5.12) lets a provider be added later. |
+| **Ads and data: a slot, left empty** | Built free, offline, nothing collected; one seam (4.12) lets a provider be added later. |
 | **Assets live outside the project** | The shelf is outside; only the subset a builder uses is copied in; sound libraries never. |
 
 ## Parked (not in version 1)

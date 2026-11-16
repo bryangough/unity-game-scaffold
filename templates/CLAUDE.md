@@ -62,4 +62,6 @@ finger none of this shows).
   rebuilt from its menu, tests green, the changed levels played to a win and a loss, `R` restarts.
   **Never run Editor commands while __OWNER__ is in Play mode** (check `GetState` first; `Logs/FunTest.txt` shows
   their results), and never touch their save without asking (`Progress.Suspended` for bots).
+- **No player builds until the plan reaches them** (the builds phase of TASKS.md, after the look and the sound):
+  until then judge phone shapes in the Game view and the captures. Build early only if __OWNER__ asks.
 - Commit per task: `type(phaseN): summary`.

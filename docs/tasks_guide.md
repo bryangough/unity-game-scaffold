@@ -73,7 +73,7 @@ Answered questions move to decisions; their numbers are never reused.
 - **One file.** Store copy, story words and art prompts get their own files only when they are long; the task list
   links to them. The CLAUDE.md (or README) points at TASKS.md as the plan and at `initial/` as history.
 - **Commit per task**, `type(phaseN): summary` (`feat(phase3)`, `fix(phase5)`, `docs(phase6)`, `chore(phase7)`,
-  `build(phase2)` for the version bump a build makes).
+  `build(phase5)` for the version bump a build makes).
 
 ## Why it works
 

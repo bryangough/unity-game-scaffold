@@ -55,15 +55,22 @@ to make), and the **road to a full game**: six milestones, each with the owner's
 | | Milestone | The owner's check |
 |---|---|---|
 | M1 | Ten levels prove the base | plays ten and says "we have a game" |
-| M2 | In a hand | ten inputs on a phone without one going wrong; reads at arm's length |
-| M3 | A game around the levels | a new player gets from the icon to level 3 with nobody explaining anything |
-| M4 | A look and a sound | nothing on screen is a grey box; sounds approved by ear; the phone frame holds |
-| M5 | Forty+ levels | play 1 → N; each chapter teaches its twist in its first level without text |
+| M2 | A game around the levels | a new player gets from pressing Play to level 3 with nobody explaining anything |
+| M3 | A look and a sound | nothing on screen is a grey box; sounds approved by ear; every screen holds at the phone shapes |
+| M4 | Forty+ levels | play 1 → N; each chapter teaches its twist in its first level without text |
+| M5 | In a hand | the first builds: ten inputs on a phone without one going wrong; reads at arm's length; the frame rate holds |
 | M6 | Released | live on itch.io, Play internal testing and TestFlight; three friends finish ten levels unaided |
 
-The phases below the table hold the briefs (0 own the code · 1 the base game · 2 phone and web builds · 3 rules ·
-4 look and sound · 5 the game around the levels · 6 store and release · 7 cleanup). The template in this scaffold
-has the briefs every game needed; a game deletes what it does not and adds its own.
+The phases below the table hold the briefs (0 own the code · 1 the base game · 2 rules · 3 look and sound ·
+4 the game around the levels · 5 phone and web builds · 6 store and release · 7 cleanup). The template in this
+scaffold has the briefs every game needed; a game deletes what it does not and adds its own. A game whose plan was
+written before this order (an adopted project, an older game) keeps its own ids: they never change once used.
+
+**Builds come late.** No player build is made until the levels, the screens, the look and the sound are in (M5,
+phase 5). Until then the game is played and judged in the Editor: the Game view at the phone shapes, the captures at
+phone / tall phone / tablet, the text audit, the smoke run. An early build measures a game that will not ship (the
+size and the frame time change with the art) and makes every task wait on a device; the first build with everything
+in gives the real numbers once.
 
 ## 4. How a task runs
 
@@ -89,8 +96,8 @@ be read later (by the owner, by the next session, by a commit message):
   solver wins but the game does not means the views, the input or the frame loop disagree with the rules.
   `LevelReplay` and `ReplayBot` drive it; the plans come from the level check's cache.
 - **Tests**: EditMode, through the Test Runner API to a report (the MCP cannot open the window).
-- **Size**: every build writes the packed assets by kind and the 25 heaviest; the web download is logged against a
-  budget. Cuts are picked by size, not guessed.
+- **Size** (from phase 5 on): every build writes the packed assets by kind and the 25 heaviest; the web download is
+  logged against a budget. Cuts are picked by size, not guessed.
 - **Sound report**: what the clips cost in git and in a phone build.
 - **Colour check** and **smoke run**: a capture under five kinds of vision; the game opened, drawn and restarted by a
   bot with no hand on it.

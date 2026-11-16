@@ -319,7 +319,7 @@ def build(c, folder, shown=None):
         f.write(f"# {c['name']}\n\nA Unity game made from the game scaffold. Start with [`CLAUDE.md`](./CLAUDE.md) and "
                 f"[`Assets/docs/TASKS.md`](./Assets/docs/TASKS.md).\n\n"
                 f"- Open the folder in Unity Hub (Unity 6000.6), run **{c['name']} > Setup Project (once)**, press Play.\n"
-                f"- Headless: `python tools/unity_batch.py setup`, `tests`, `levels`, `build webgl`.\n"
+                f"- Headless: `python tools/unity_batch.py setup`, `tests`, `levels` (and `build webgl` once the plan reaches the builds).\n"
                 f"- How the work is done: [`docs/method.md`](./docs/method.md), [`docs/tasks_guide.md`](./docs/tasks_guide.md), "
                 f"and the traps already paid for in [`docs/lessons.md`](./docs/lessons.md).\n"
                 f"- To bring a prototype in from the idea test bed: `python tools/graduate.py <proto folder> {shown or folder}`.\n"

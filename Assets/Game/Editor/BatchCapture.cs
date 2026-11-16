@@ -13,7 +13,7 @@ namespace GameScaffold.Editor
     /// game that has to run for a while needs the real Editor (<see cref="SmokeRun"/>). The log carries the camera,
     /// every renderer and the picture's mean brightness, so the result can be read without opening the picture.
     /// <para><c>capture &lt;screen&gt;</c> (<c>-shellScreen</c>) poses one of the <see cref="Shell"/>'s screens first
-    /// (Title, Levels, Play, Result, Pause, Settings, Confirm) and writes <c>batch_&lt;screen&gt;.png</c>: showing a
+    /// (Title, Levels, Play, Result, Pause, Settings, Confirm, HowTo) and writes <c>batch_&lt;screen&gt;.png</c>: showing a
     /// screen needs no frames, so every menu can be looked at headless. The save is not written.</para>
     /// </summary>
     public static class BatchCapture
@@ -94,7 +94,7 @@ namespace GameScaffold.Editor
             if (Shell.Instance == null) { Debug.LogWarning("[BatchCapture] no Shell in the scene: capturing the opening frame"); return; }
             Progress.Suspended = true;
             if (screen == Shell.Result) Shell.ShowResult(true, Progress.Star1 | Progress.Star2, "A sample result line");
-            else if (screen == Shell.Pause || screen == Shell.Settings || screen == Shell.Confirm) { Shell.Go(Shell.Play); Shell.Open(screen); }
+            else if (screen == Shell.Pause || screen == Shell.Settings || screen == Shell.Confirm || screen == Shell.HowTo) { Shell.Go(Shell.Play); Shell.Open(screen); }
             else Shell.Go(screen);
         }
     }

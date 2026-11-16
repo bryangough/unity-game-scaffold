@@ -392,14 +392,18 @@ namespace GameScaffold
 
         private void BuildPause(Transform root)
         {
-            float dy = HasHowTo ? 51f : 0f; // a fifth row: the card is taller and everything moves up half a row
+            // a fifth row: the card is taller and everything moves up half a row. A landscape canvas is only 720 tall,
+            // so there the rows close up instead (still over the 80 px button floor) and the card stays inside it
+            bool tight = HasHowTo && Wide;
+            float dy = !HasHowTo ? 0f : tight ? 30f : 51f;
+            float pitch = tight ? 90f : 102f, rowH = tight ? 82f : 92f, row = tight ? 25f : -18f + dy;
             pausePanel = MakePanel(root, "Panel_Pause", new Vector2(520f, 640f + 2f * dy), "PAUSED", out Transform card);
             pauseCaption = ShellUI.Label(card, "Text_Level", "", 26f, SoftCol, ShellUI.Centre, new Vector2(0f, 192f + dy), new Vector2(460f, 44f), skin);
             resumeButton = Btn(card, "Button_Resume", "RESUME", UISkin.Role.Primary, new Vector2(0f, 96f + dy), new Vector2(400f, 104f), Resume, 40f);
-            Btn(card, "Button_Restart", "RESTART", UISkin.Role.Plain, new Vector2(0f, -18f + dy), new Vector2(400f, 92f), Retry);
-            Btn(card, "Button_Levels", "LEVELS", UISkin.Role.Plain, new Vector2(0f, -120f + dy), new Vector2(400f, 92f), () => Go(Levels));
-            Btn(card, "Button_Settings", "SETTINGS", UISkin.Role.Plain, new Vector2(0f, -222f + dy), new Vector2(400f, 92f), () => Open(Settings));
-            if (HasHowTo) Btn(card, "Button_HowTo", "HOW TO PLAY", UISkin.Role.Plain, new Vector2(0f, -324f + dy), new Vector2(400f, 92f), () => Open(HowTo));
+            Btn(card, "Button_Restart", "RESTART", UISkin.Role.Plain, new Vector2(0f, row), new Vector2(400f, rowH), Retry);
+            Btn(card, "Button_Levels", "LEVELS", UISkin.Role.Plain, new Vector2(0f, row - pitch), new Vector2(400f, rowH), () => Go(Levels));
+            Btn(card, "Button_Settings", "SETTINGS", UISkin.Role.Plain, new Vector2(0f, row - 2f * pitch), new Vector2(400f, rowH), () => Open(Settings));
+            if (HasHowTo) Btn(card, "Button_HowTo", "HOW TO PLAY", UISkin.Role.Plain, new Vector2(0f, row - 3f * pitch), new Vector2(400f, rowH), () => Open(HowTo));
         }
 
         private void BuildSettings(Transform root)
@@ -458,23 +462,27 @@ namespace GameScaffold
         private void BuildHowTo(Transform root)
         {
             if (!HasHowTo) return;
-            const float rowH = 132f;
             int n = HowToRows.Length;
+            // the card stays inside the canvas: with many rules, or on a landscape canvas (720 tall, so a wider card
+            // and longer lines), the rows close up and the pictures with them; BACK is never pushed off the screen
+            float w = Wide ? 900f : 660f;
+            float rowH = Mathf.Min(132f, (PrototypeUIHelper.ReferenceResolution.y - 240f) / n);
+            float pic = Mathf.Min(108f, rowH - 16f);
             float h = 200f + n * rowH;
-            howToPanel = MakePanel(root, "Panel_HowTo", new Vector2(660f, h), "HOW TO PLAY", out Transform card);
-            float top = h * 0.5f - 150f;
+            howToPanel = MakePanel(root, "Panel_HowTo", new Vector2(w, h), "HOW TO PLAY", out Transform card);
+            float top = h * 0.5f - 84f - rowH * 0.5f; // the rows fill the space between the heading and BACK
             for (int i = 0; i < n; i++)
             {
                 float y = top - i * rowH;
                 if (HowToRows[i].picture != null)
                 {
-                    RectTransform pr = ShellUI.Box(card, "Picture_" + i, ShellUI.Centre, new Vector2(-240f, y), new Vector2(108f, 108f));
+                    RectTransform pr = ShellUI.Box(card, "Picture_" + i, ShellUI.Centre, new Vector2(-w * 0.5f + 90f, y), new Vector2(pic, pic));
                     var img = pr.gameObject.AddComponent<Image>();
                     img.sprite = HowToRows[i].picture;
                     img.preserveAspect = true;
                     img.raycastTarget = false;
                 }
-                TextMeshProUGUI t = ShellUI.Label(card, "Text_Rule_" + i, HowToRows[i].line, ShellUI.BodySize, TextCol, ShellUI.Centre, new Vector2(64f, y), new Vector2(464f, rowH - 8f), skin);
+                TextMeshProUGUI t = ShellUI.Label(card, "Text_Rule_" + i, HowToRows[i].line, ShellUI.BodySize, TextCol, ShellUI.Centre, new Vector2(64f, y), new Vector2(w - 196f, rowH - 8f), skin);
                 t.alignment = TextAlignmentOptions.MidlineLeft;
                 t.enableAutoSizing = true;
                 t.fontSizeMin = ShellUI.BodySize; // read mid-game: never under the body floor

@@ -149,6 +149,9 @@ namespace GameScaffold
             current = null; checkedLaunch = false; NewPlayer = false;
 #if UNITY_EDITOR
             suspended = UnityEditor.SessionState.GetBool(SuspendedKey, false); // survives entering Play mode
+            // said out loud: a tool that locked the save and never reached Play mode would otherwise leave the owner's
+            // next session unsaved without a word
+            if (suspended) Debug.LogWarning("[Progress] the save is locked (Progress.Suspended): nothing in this Play session is written to it");
 #else
             suspended = false;
 #endif

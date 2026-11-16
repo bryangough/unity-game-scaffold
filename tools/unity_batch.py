@@ -8,7 +8,7 @@
     python tools/unity_batch.py build webgl        # a player build through Editor/PhoneBuilds.cs (webgl|android|ios)
     python tools/unity_batch.py capture            # Play mode for a moment, a 720x1280 shot -> Builds/Checks/views/batch.png
     python tools/unity_batch.py capture Levels     # the same with one of the shell's screens up (Title, Levels, Play,
-                                                   # Result, Pause, Settings, Confirm) -> batch_Levels.png
+                                                   # Result, Pause, Settings, Confirm, HowTo) -> batch_Levels.png
 
 Why: an AI assistant (or CI) can verify a change without a human at the Editor. The Unity version comes from
 ProjectSettings/ProjectVersion.txt and the Hub's default install folder; set UNITY_PATH to override. Logs land in

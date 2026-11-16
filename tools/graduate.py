@@ -20,7 +20,7 @@ What it does:
      (--row, or guessed from the folder's NN), every PLAYTEST_NOTES.md line about it, and copies the GDD from
      docs/games/NN_*.md if there is one. That record is the "where this came from" every shipped game kept. A record
      the project already has is never replaced: what was found goes to fun_test_record.new.md beside it, and nothing
-     is written when nothing was found. The test bed is the project the prototype folder sits in; --testbed names it
+     is written when nothing was found. (The scaffold's template, still unfilled, is not a record: it is replaced.) The test bed is the project the prototype folder sits in; --testbed names it
      when the prototype has already left (it was copied into its own project before that project had the scaffold).
   5. Copies the prototype's README.md (its rules, as played) to Assets/docs/rules.md, unless one is there.
   6. Prints the hand steps left (the builder's body into the game's scene part, the manager, the first commit).
@@ -170,7 +170,10 @@ def main():
             found.append(f"{len(lines)} playtest note(s)")
     initial = os.path.join(project, "Assets", "docs", "initial")
     record_path = os.path.join(initial, "fun_test_record.md")
-    has_record = os.path.exists(record_path) and "copy it by hand" not in read(record_path) and len(read(record_path).strip().splitlines()) > 6
+    old = read(record_path) if os.path.exists(record_path) else ""
+    # the scaffold's own template, never filled in (a game just made by new_game.py), is not a record to keep
+    template = "`tools/graduate.py` fills this file" in old and '"..."' in old
+    has_record = bool(old) and not template and "copy it by hand" not in old and len(old.strip().splitlines()) > 6
     where = f"{docs} (row {row})"
     if has_record and not found:
         print(f"fun-test record: kept the project's; nothing about this prototype in {where}"

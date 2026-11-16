@@ -11,7 +11,9 @@ rename rules and the sync rules agree), then unity_batch.py setup, tests and lev
 step fails. The adoption is the other way in: a small project that already exists (a prototype beside its old kit,
 its own task list and fun-test record, in git) takes the scaffold with `new_game.py --into`, then `graduate.py` on the
 prototype inside it; the project's plan, record and productGUID must come through untouched, the prototype must land
-in the game's namespace (not doubled), and the result must set up and pass its tests. Each game takes a few minutes (a first import). Run it before handing off a change to the scaffold; the
+in the game's namespace (not doubled), and the result must set up and pass its tests. The graduation is the method's
+own path: a prototype in a test bed, a game just made by new_game.py, `graduate.py` from one to the other; the game's
+unfilled record template must be replaced by the test bed's row and playtest lines (no Unity run: seconds). Each game takes a few minutes (a first import). Run it before handing off a change to the scaffold; the
 scaffold itself does not need to be closed in the Editor, only the copies are opened.
 """
 import os
@@ -159,6 +161,85 @@ def adoption(keep):
     return failed
 
 
+BED_TASKS = """# The test bed
+
+### 1.06 Another
+
+not this one
+
+### 1.07 Smoke Game
+
+**Fun question:** is the tap fun?
+
+### 1.08 Next
+
+nor this
+"""
+BED_NOTES = """| # | Prototype | Note | Read | Fixed after |
+|---|---|---|---|---|
+| 06 | Another | meh | Park | |
+| 07 | Smoke Game | love it, its own folder | Up | |
+"""
+
+
+def graduation(keep):
+    """A prototype in a test bed into a game just made from the scaffold. Returns what failed, or None."""
+    root = tempfile.mkdtemp(prefix="scaffold_smoke_")
+    bed, folder = os.path.join(root, "Bed"), os.path.join(root, "Game")
+    print(f"\ngraduation: {folder}")
+    files = {
+        "Assets/Prototypes/Proto_07_SmokeGame/Scripts/SmokeProto.cs": PROTO,
+        "Assets/Prototypes/Proto_07_SmokeGame/Scripts/SmokeProto.cs.meta": f"fileFormatVersion: 2\nguid: {SCRIPT_GUID}\n",
+        "Assets/Prototypes/Proto_07_SmokeGame/README.md": "# 07 Smoke Game\n\nThe rules as played.\n",
+        "Assets/Prototypes/Common/FunTestKit.cs": OLD_KIT,
+        "Assets/docs/TASKS.md": BED_TASKS,
+        "Assets/docs/PLAYTEST_NOTES.md": BED_NOTES,
+        "Assets/docs/games/07_smoke_game.md": "# The design doc\n",
+    }
+    for rel, text in files.items():
+        path = os.path.join(bed, rel)
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "w", encoding="utf-8", newline="\n") as f:
+            f.write(text)
+    proto = os.path.join(bed, "Assets", "Prototypes", "Proto_07_SmokeGame")
+    failed = None
+    for what, cmd in (
+        ("new_game", [sys.executable, os.path.join(TOOLS, "new_game.py"), "Smoke Game", "--folder", folder, "--no-git"]),
+        ("graduate (from a test bed)", [sys.executable, os.path.join(TOOLS, "graduate.py"), proto, folder]),
+    ):
+        if not step(what, cmd):
+            failed = what
+            break
+    if not failed:
+        bad = []
+        initial = os.path.join(folder, "Assets", "docs", "initial")
+        record = read(os.path.join(initial, "fun_test_record.md"))
+        if "is the tap fun?" not in record or "love it, its own folder" not in record or "not this one" in record or "meh" in record:
+            bad.append("the fun-test record does not hold the prototype's row and playtest line (and only those)")
+        if os.path.exists(os.path.join(initial, "fun_test_record.new.md")):
+            bad.append("the unfilled record template was kept as if it were the project's own record")
+        if not os.path.exists(os.path.join(initial, "07_smoke_game.md")):
+            bad.append("the design doc was not copied")
+        moved = os.path.join(folder, "Assets/Game/Scripts/SmokeGame/SmokeProto.cs")
+        if not os.path.exists(moved) or "namespace SmokeGame\n" not in read(moved) or "MobilePrototypes" in read(moved):
+            bad.append("the prototype did not land in namespace SmokeGame")
+        elif not os.path.exists(moved + ".meta") or SCRIPT_GUID not in read(moved + ".meta"):
+            bad.append("the prototype's script lost its GUID")
+        if not os.path.exists(os.path.join(folder, "Assets/docs/rules.md")):
+            bad.append("the prototype's README.md was not copied to Assets/docs/rules.md")
+        if not os.path.exists(os.path.join(proto, "Scripts", "SmokeProto.cs")):
+            bad.append("the test bed's prototype was changed")
+        print(f"    {'ok  ' if not bad else 'FAIL'} the record filled, the prototype moved")
+        for line in bad:
+            print("      " + line)
+        failed = "record and prototype" if bad else None
+    if keep:
+        print(f"    kept: {folder}")
+    else:
+        shutil.rmtree(root, ignore_errors=True)
+    return failed
+
+
 def main():
     quick, keep, only_adopt = "--quick" in sys.argv, "--keep" in sys.argv, "--adopt" in sys.argv
     failed = []
@@ -181,6 +262,10 @@ def main():
             print(f"    kept: {folder}")
         else:
             shutil.rmtree(os.path.dirname(folder), ignore_errors=True)
+    if not quick and not only_adopt:
+        what = graduation(keep)
+        if what:
+            failed.append(f"graduation: {what}")
     if not quick:
         what = adoption(keep)
         if what:

@@ -14,9 +14,9 @@ three games built the same way. `README.md` is the front page; `docs/method.md`,
   (`Game/`), `GameInfo.Id / Title / Credit`, Player Settings product and company, `__GAME__`-style tokens in the
   docs and Store templates. Never hard-code a game's name anywhere else.
 - Verify before hand-off: `python tools/unity_batch.py compile`, `tests`, `levels`, then `python tools/smoke.py`
-  (fresh games made by `new_game.py`, with and without the sample, portrait and landscape, and an existing project
-  adopted with `--into` and graduated in place, each set up, tested and
-  level-checked headless: the smoke test of the whole thing). The project must not be open in another Editor while the batch
+  (fresh games made by `new_game.py`, with and without the sample, portrait and landscape, a prototype graduated
+  from a test bed into a fresh game, and an existing project adopted with `--into` and graduated in place, each set
+  up, tested and level-checked headless: the smoke test of the whole thing). The project must not be open in another Editor while the batch
   runs (`Temp/UnityLockfile`).
 
 ## Layout
